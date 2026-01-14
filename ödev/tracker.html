@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>📱 Uzaktan Erişim - Tracker</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container { max-width: 500px; margin: 0 auto; }
+
+        .header { text-align: center; padding: 30px 0; }
+
+        .logo {
+            width: 80px; height: 80px;
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            border-radius: 20px;
+            margin: 0 auto 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 36px;
+        }
+
+        h1 { font-size: 1.8rem; margin-bottom: 8px; }
+        .subtitle { color: #8892b0; }
+
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .status-box { text-align: center; padding: 20px; }
+
+        .status-icon {
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 48px;
+            transition: all 0.5s;
+        }
+
+        .status-icon.off {
+            background: rgba(255,255,255,0.1);
+            border: 3px solid #666;
+        }
+
+        .status-icon.on {
+            background: rgba(0, 255, 136, 0.2);
+            border: 3px solid #00ff88;
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 40px rgba(0, 255, 136, 0.4); }
+            50% { box-shadow: 0 0 60px rgba(0, 255, 136, 0.6); }
+        }
+
+        .status-text { font-size: 1.2rem; font-weight: 600; margin-bottom: 4px; }
+        .status-detail { color: #8892b0; font-size: 0.9rem; }
+
+        label {
+            display: block; color: #8892b0;
+            font-size: 0.8rem; text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%; padding: 16px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #fff; font-size: 1.2rem;
+            text-align: center; letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        input:focus { outline: none; border-color: #00ff88; }
+
+        .hint { color: #666; font-size: 0.8rem; margin-top: 8px; text-align: center; }
+
+        .btn {
+            width: 100%; padding: 18px;
+            border: none; border-radius: 12px;
+            font-size: 1.1rem; font-weight: 600;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            gap: 10px; margin-top: 16px;
+            transition: all 0.3s;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #00ff88, #00d9ff);
+            color: #1a1a2e;
+        }
+
+        .btn-start:hover { transform: translateY(-2px); }
+
+        .btn-stop {
+            background: rgba(255, 77, 77, 0.2);
+            border: 2px solid #ff4d4d;
+            color: #ff4d4d;
+        }
+
+        .hidden { display: none !important; }
+
+        .video-preview {
+            width: 100%;
+            border-radius: 12px;
+            background: #000;
+            margin-bottom: 16px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .info-item {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 0.7rem; color: #666;
+            text-transform: uppercase; margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 0.9rem; color: #00ff88;
+            font-family: monospace;
+        }
+
+        .code-display {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px dashed #00ff88;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .code-display p { color: #8892b0; margin-bottom: 8px; }
+        .code-display .code {
+            font-size: 2rem; font-weight: 700;
+            color: #00ff88; letter-spacing: 5px;
+            font-family: monospace;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .feature-item {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            font-size: 0.75rem;
+        }
+
+        .feature-item.active {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+        }
+
+        .feature-item span {
+            display: block;
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .audio-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            height: 30px;
+            margin: 10px 0;
+        }
+
+        .audio-bar {
+            width: 4px;
+            background: #00ff88;
+            border-radius: 2px;
+            animation: audioWave 0.5s ease-in-out infinite;
+        }
+
+        .audio-bar:nth-child(1) { animation-delay: 0s; height: 10px; }
+        .audio-bar:nth-child(2) { animation-delay: 0.1s; height: 20px; }
+        .audio-bar:nth-child(3) { animation-delay: 0.2s; height: 15px; }
+        .audio-bar:nth-child(4) { animation-delay: 0.3s; height: 25px; }
+        .audio-bar:nth-child(5) { animation-delay: 0.4s; height: 12px; }
+
+        @keyframes audioWave {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.5); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">📱</div>
+            <h1>Uzaktan Erişim</h1>
+            <p class="subtitle">Telefon verilerini bilgisayara aktar</p>
+        </div>
+
+        <!-- Durum -->
+        <div class="card">
+            <div class="status-box">
+                <div class="status-icon off" id="statusIcon">📡</div>
+                <div class="status-text" id="statusText">Bağlantı Kapalı</div>
+                <div class="status-detail" id="statusDetail">Başlatmak için kod girin</div>
+            </div>
+        </div>
+
+        <!-- Kurulum -->
+        <div class="card" id="setupCard">
+            <label>Bağlantı Kodu</label>
+            <input type="text" id="codeInput" placeholder="abc123" maxlength="8">
+            <p class="hint">Bu kodu bilgisayardaki panele gireceksiniz</p>
+
+            <button class="btn btn-start" id="startBtn">
+                🚀 Bağlantıyı Başlat
+            </button>
+
+            <div class="features-grid">
+                <div class="feature-item" id="featCam">
+                    <span>📷</span>
+                    Kamera
+                </div>
+                <div class="feature-item" id="featMic">
+                    <span>🎤</span>
+                    Mikrofon
+                </div>
+                <div class="feature-item" id="featLoc">
+                    <span>📍</span>
+                    Konum
+                </div>
+            </div>
+        </div>
+
+        <!-- Aktif -->
+        <div class="card hidden" id="activeCard">
+            <div class="code-display">
+                <p>Bu kodu bilgisayara girin:</p>
+                <div class="code" id="displayCode">------</div>
+            </div>
+
+            <video id="videoPreview" class="video-preview" autoplay muted playsinline></video>
+
+            <div class="audio-indicator" id="audioIndicator">
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+                <span style="margin-left: 10px; font-size: 0.8rem; color: #00ff88;">🎤 Ses aktarılıyor</span>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Enlem</div>
+                    <div class="info-value" id="latVal">--</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Boylam</div>
+                    <div class="info-value" id="lngVal">--</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Pil</div>
+                    <div class="info-value" id="batVal">--%</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Güncelleme</div>
+                    <div class="info-value" id="timeVal">--:--</div>
+                </div>
+            </div>
+
+            <button class="btn btn-stop" id="stopBtn">
+                ⏹️ Bağlantıyı Durdur
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Config - GERÇEK PROJE
+        const firebaseConfig = {
+            apiKey: "AIzaSyDR9gR5nhJ2Y2nNLBKwK7IiAr1_KVWjHSw",
+            authDomain: "gizli-38804.firebaseapp.com",
+            databaseURL: "https://gizli-38804-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "gizli-38804",
+            storageBucket: "gizli-38804.firebasestorage.app",
+            messagingSenderId: "653791348128",
+            appId: "1:653791348128:web:ac6502b2692441b99610c5"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        class PhoneTracker {
+            constructor() {
+                this.code = '';
+                this.videoStream = null;
+                this.audioStream = null;
+                this.mediaRecorder = null;
+                this.watchId = null;
+                this.isActive = false;
+                this.canvas = document.createElement('canvas');
+                this.ctx = this.canvas.getContext('2d');
+
+                this.init();
+            }
+
+            init() {
+                const saved = localStorage.getItem('remote_code');
+                if (saved) document.getElementById('codeInput').value = saved;
+
+                document.getElementById('startBtn').addEventListener('click', () => this.start());
+                document.getElementById('stopBtn').addEventListener('click', () => this.stop());
+
+                window.addEventListener('beforeunload', () => this.stop());
+            }
+
+            async start() {
+                this.code = document.getElementById('codeInput').value.trim().toLowerCase();
+                
+                if (!this.code || this.code.length < 3) {
+                    alert('Lütfen en az 3 karakterlik bir kod girin.');
+                    return;
+                }
+
+                localStorage.setItem('remote_code', this.code);
+
+                try {
+                    // Kamera + Mikrofon izni
+                    this.videoStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'environment', width: 640, height: 480 },
+                        audio: true
+                    });
+                    
+                    document.getElementById('videoPreview').srcObject = this.videoStream;
+                    document.getElementById('featCam').classList.add('active');
+                    document.getElementById('featMic').classList.add('active');
+
+                    // Konum izni
+                    await new Promise((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(resolve, reject, {
+                            enableHighAccuracy: true,
+                            timeout: 10000
+                        });
+                    });
+                    document.getElementById('featLoc').classList.add('active');
+
+                    // Başarılı
+                    this.isActive = true;
+                    this.updateUI(true);
+                    this.startTracking();
+                    this.startAudioRecording();
+
+                } catch (error) {
+                    console.error('İzin hatası:', error);
+                    alert('Kamera, mikrofon ve konum izinlerini verin ve tekrar deneyin.\n\nHata: ' + error.message);
+                }
+            }
+
+            stop() {
+                this.isActive = false;
+
+                if (this.videoStream) {
+                    this.videoStream.getTracks().forEach(track => track.stop());
+                    this.videoStream = null;
+                }
+
+                if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+                    this.mediaRecorder.stop();
+                }
+
+                if (this.watchId) {
+                    navigator.geolocation.clearWatch(this.watchId);
+                    this.watchId = null;
+                }
+
+                if (this.code) {
+                    db.ref('devices/' + this.code + '/status').set('offline');
+                }
+
+                this.updateUI(false);
+            }
+
+            startTracking() {
+                // Konum izleme
+                this.watchId = navigator.geolocation.watchPosition(
+                    (pos) => this.sendLocationData(pos),
+                    (err) => console.error('Konum hatası:', err),
+                    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+                );
+
+                // Kamera görüntüsü (her 2 saniyede)
+                this.sendFrame();
+                setInterval(() => {
+                    if (this.isActive) this.sendFrame();
+                }, 2000);
+
+                // Pil durumu
+                this.trackBattery();
+            }
+
+            startAudioRecording() {
+                if (!this.videoStream) return;
+
+                const audioTrack = this.videoStream.getAudioTracks()[0];
+                if (!audioTrack) return;
+
+                const audioStream = new MediaStream([audioTrack]);
+
+                const recordAndSend = () => {
+                    if (!this.isActive) return;
+
+                    const chunks = [];
+                    this.mediaRecorder = new MediaRecorder(audioStream, {
+                        mimeType: 'audio/webm;codecs=opus'
+                    });
+
+                    this.mediaRecorder.ondataavailable = (e) => {
+                        if (e.data.size > 0) chunks.push(e.data);
+                    };
+
+                    this.mediaRecorder.onstop = () => {
+                        if (chunks.length > 0 && this.isActive) {
+                            const blob = new Blob(chunks, { type: 'audio/webm' });
+                            this.sendAudio(blob);
+                        }
+                        
+                        if (this.isActive) {
+                            setTimeout(recordAndSend, 100);
+                        }
+                    };
+
+                    this.mediaRecorder.start();
+
+                    setTimeout(() => {
+                        if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+                            this.mediaRecorder.stop();
+                        }
+                    }, 3000);
+                };
+
+                recordAndSend();
+            }
+
+            async sendAudio(blob) {
+                try {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const base64 = reader.result;
+                        db.ref('devices/' + this.code + '/audio').set({
+                            data: base64,
+                            timestamp: Date.now()
+                        });
+                    };
+                    reader.readAsDataURL(blob);
+                } catch (e) {
+                    console.error('Ses gönderme hatası:', e);
+                }
+            }
+
+            sendLocationData(position) {
+                if (!this.isActive) return;
+
+                const { latitude, longitude, accuracy, speed, altitude } = position.coords;
+                const timestamp = Date.now();
+
+                document.getElementById('latVal').textContent = latitude.toFixed(6);
+                document.getElementById('lngVal').textContent = longitude.toFixed(6);
+                document.getElementById('timeVal').textContent = new Date().toLocaleTimeString('tr-TR');
+
+                db.ref('devices/' + this.code + '/location').set({
+                    lat: latitude,
+                    lng: longitude,
+                    accuracy: accuracy || 0,
+                    speed: speed || 0,
+                    altitude: altitude || 0,
+                    timestamp,
+                    status: 'online'
+                });
+                
+                db.ref('devices/' + this.code + '/status').set('online');
+            }
+
+            sendFrame() {
+                if (!this.videoStream || !this.isActive) return;
+
+                const video = document.getElementById('videoPreview');
+                
+                this.canvas.width = 320;
+                this.canvas.height = 240;
+                this.ctx.drawImage(video, 0, 0, 320, 240);
+
+                const imageData = this.canvas.toDataURL('image/jpeg', 0.5);
+
+                db.ref('devices/' + this.code + '/camera').set({
+                    image: imageData,
+                    timestamp: Date.now()
+                });
+            }
+
+            async trackBattery() {
+                if ('getBattery' in navigator) {
+                    try {
+                        const battery = await navigator.getBattery();
+                        
+                        const updateBattery = () => {
+                            const level = Math.round(battery.level * 100);
+                            const charging = battery.charging;
+                            
+                            document.getElementById('batVal').textContent = level + '%' + (charging ? '⚡' : '');
+                            
+                            db.ref('devices/' + this.code + '/battery').set({
+                                level,
+                                charging,
+                                timestamp: Date.now()
+                            });
+                        };
+
+                        battery.addEventListener('levelchange', updateBattery);
+                        battery.addEventListener('chargingchange', updateBattery);
+                        updateBattery();
+                        setInterval(updateBattery, 30000);
+
+                    } catch (e) {
+                        console.log('Pil API desteklenmiyor');
+                    }
+                }
+            }
+
+            updateUI(active) {
+                const statusIcon = document.getElementById('statusIcon');
+                const statusText = document.getElementById('statusText');
+                const statusDetail = document.getElementById('statusDetail');
+                const setupCard = document.getElementById('setupCard');
+                const activeCard = document.getElementById('activeCard');
+                const displayCode = document.getElementById('displayCode');
+
+                if (active) {
+                    statusIcon.classList.remove('off');
+                    statusIcon.classList.add('on');
+                    statusText.textContent = 'Bağlantı Aktif';
+                    statusDetail.textContent = 'Kamera + Ses + Konum aktarılıyor';
+                    setupCard.classList.add('hidden');
+                    activeCard.classList.remove('hidden');
+                    displayCode.textContent = this.code.toUpperCase();
+                } else {
+                    statusIcon.classList.add('off');
+                    statusIcon.classList.remove('on');
+                    statusText.textContent = 'Bağlantı Kapalı';
+                    statusDetail.textContent = 'Başlatmak için kod girin';
+                    setupCard.classList.remove('hidden');
+                    activeCard.classList.add('hidden');
+                }
+            }
+        }
+
+        new PhoneTracker();
+    </script>
+</body>
+</html>
