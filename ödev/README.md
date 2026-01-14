@@ -1,124 +1,131 @@
-# 📱 Uzaktan Erişim - Telefon Kontrol Paneli
+# 📱 Tracker Pro v3.0
 
-Telefonunu uzaktan kontrol et! **Kamera**, **Mikrofon**, **Konum** ve **Pil** durumunu bilgisayarından canlı izle.
+**Kesintisiz** telefon takip ve uzaktan erişim sistemi. Web tabanlı, Firebase altyapılı.
 
----
+## ✨ v3.0 Yenilikleri
 
-## 🎯 Ne İşe Yarar?
+### 🔄 Otomatik Yeniden Bağlanma
+- İnternet kesilip açılınca **otomatik bağlanır**
+- Telefon uyku moduna geçse bile **uyanınca devam eder**
+- Sayfa kapatılıp açılsa bile **önceki oturumu devam ettirir**
+- **100 denemeye kadar** otomatik yeniden bağlanma
 
-Bu proje **ekranı kırık veya sorunlu telefonları değerlendirme** amacıyla geliştirilmiştir.
+### 📱 PWA Desteği
+- **Ana ekrana ekle** özelliği
+- **Service Worker** ile önbellekleme
+- **Wake Lock** - ekranı açık tutar
+- Uygulama gibi çalışır!
 
-Telefona sadece **bir dosya** yüklersin, bilgisayardan:
+### 📊 Gelişmiş İstatistikler
+- Çalışma süresi (uptime)
+- Yeniden bağlanma sayısı
+- Gönderilen/alınan veri miktarı (KB)
+- Son sinyal zamanı (heartbeat)
 
-| Özellik | Açıklama |
-|---------|----------|
-| 📷 **Kamera** | Telefonun kamerasından canlı görüntü |
-| 🎤 **Mikrofon** | Telefonun mikrofonundan canlı ses dinleme |
-| 📍 **Konum** | GPS ile gerçek zamanlı harita takibi |
-| 🔋 **Pil** | Şarj durumu ve seviyesi |
+## 🚀 Tüm Özellikler
 
----
+| Kategori | Özellik |
+|----------|---------|
+| **📍 Konum** | GPS takibi, hız, mesafe, hassasiyet, rota çizimi |
+| **📷 Kamera** | Canlı görüntü, fotoğraf çekme |
+| **🎤 Ses** | Canlı dinleme, ses seviyesi göstergesi |
+| **🔋 Pil** | Seviye, şarj durumu |
+| **🏃 Hareket** | Durağan/hareket algılama |
+| **🔄 Bağlantı** | Otomatik yeniden bağlanma, heartbeat |
+| **📊 İstatistik** | Uptime, data, reconnect sayısı |
 
-## 🚀 Kullanım
+## ⚠️ Bildirimler Hakkında
 
-### 📱 Telefonda (tracker.html)
+**SMS ve uygulama bildirimleri görüntülenemez!**
 
-1. `tracker.html` dosyasını telefonun tarayıcısında aç
-2. Bir **bağlantı kodu** gir (örn: `test123`)
-3. **"Bağlantıyı Başlat"** butonuna bas
-4. **Kamera**, **Mikrofon** ve **Konum** izinlerini ver
-5. Telefonu istediğin yere koy!
-
-### 💻 Bilgisayarda (index.html)
-
-1. `index.html` dosyasını tarayıcıda aç
-2. Telefonda girdiğin **aynı kodu** gir
-3. **"Bağlan"** butonuna bas
-4. **🔊 butonuna** basarak sesi dinlemeye başla
-5. Telefondan gelen her şeyi gör ve duy!
-
----
-
-## ✨ Özellikler
-
-### 📷 Kamera Görüntüsü
-- Telefonun arka kamerasından canlı görüntü
-- Her 2 saniyede bir güncelleme
-- Düşük bant genişliği kullanımı
-
-### 🎤 Ses Dinleme
-- Telefonun mikrofonundan canlı ses
-- 3 saniyelik ses parçaları halinde aktarım
-- Ses seviyesi ayarı
-- Tek tuşla aç/kapat
-
-### 📍 Konum Takibi
-- GPS ile gerçek zamanlı konum
-- Harita üzerinde canlı işaretçi
-- Gidilen rotanın çizimi
-- Hız ve hassasiyet bilgisi
-
-### 🔋 Pil Durumu
-- Şarj seviyesi (%)
-- Şarj olup olmadığı bilgisi
-
----
+Bu bir web tarayıcısı kısıtlamasıdır. Web tarayıcıları sistem bildirimlerine erişemez. Bunun için:
+- Native Android uygulaması gerekir (Java/Kotlin)
+- NotificationListenerService izni gerekir
+- Bu izin Google Play Store politikaları gereği çok kısıtlıdır
 
 ## 📁 Dosyalar
 
-| Dosya | Nerede Açılır | Ne Yapar |
-|-------|---------------|----------|
-| `tracker.html` | 📱 Telefon | Kamera + Mikrofon + GPS verilerini gönderir |
-| `index.html` | 💻 Bilgisayar | Tüm verileri gösterir ve sesi oynatır |
+| Dosya | Açıklama |
+|-------|----------|
+| `index.html` | Kontrol merkezi (bilgisayar) |
+| `tracker.html` | Takip uygulaması (telefon) |
+| `manifest.json` | PWA yapılandırması |
+| `sw.js` | Service Worker |
+| `README.md` | Bu dosya |
 
----
+## ⚙️ Kurulum
 
-## 🔧 Teknik Bilgiler
-
-### Kullanılan Teknolojiler
-- **HTML5 / CSS3 / JavaScript**
-- **Firebase Realtime Database** - Anlık veri senkronizasyonu
-- **Leaflet.js** - İnteraktif harita
-- **MediaDevices API** - Kamera ve mikrofon erişimi
-- **Geolocation API** - GPS konum
-- **Battery API** - Pil durumu
-- **MediaRecorder API** - Ses kaydı
-
-### Veri Akışı
-```
-📱 Telefon                    ☁️ Firebase                   💻 Bilgisayar
-    │                              │                              │
-    ├── Kamera görüntüsü ─────────►├─────────────────────────────►│
-    ├── Mikrofon sesi ────────────►├─────────────────────────────►│
-    ├── GPS konumu ───────────────►├─────────────────────────────►│
-    └── Pil durumu ───────────────►└─────────────────────────────►│
+### 1. Firebase Ayarları
+```json
+{
+  "rules": {
+    "devices": {
+      "$deviceId": {
+        ".read": "$deviceId.length >= 6",
+        ".write": "$deviceId.length >= 6"
+      }
+    }
+  }
+}
 ```
 
+### 2. HTTPS Hosting (Zorunlu)
+GitHub Pages, Netlify veya başka bir HTTPS hosting kullanın.
+
+### 3. Dosyaları Yükle
+Tüm dosyaları hosting'e yükleyin:
+- `index.html`
+- `tracker.html`
+- `manifest.json`
+- `sw.js`
+
+## 📖 Kullanım
+
+### Telefonda:
+1. `tracker.html` açın
+2. "Ana ekrana ekle" seçeneğini kullanın (önerilir)
+3. Bağlantı kodu girin
+4. "🚀 Bağlantıyı Başlat"
+
+### Bilgisayarda:
+1. `index.html` açın
+2. Aynı kodu girin
+3. "Bağlan"
+
+## 🔄 Otomatik Bağlanma Nasıl Çalışır?
+
+1. **Network Listener:** İnternet durumu sürekli izlenir
+2. **Visibility API:** Sayfa görünür olunca kontrol yapılır
+3. **Heartbeat:** Her 25 saniyede sinyal gönderilir
+4. **Auto-restart:** Önceki oturum varsa otomatik başlar
+5. **Exponential Backoff:** Bağlantı hatalarında artan bekleme
+
+## 💡 İpuçları
+
+### Telefonda Uzun Süre Çalışması İçin:
+1. **Ana ekrana ekleyin** (PWA olarak)
+2. **Pil optimizasyonunu kapatın** (Ayarlar > Uygulamalar > Chrome > Pil)
+3. **Ekran zaman aşımını uzatın**
+4. **Telefonu şarjda tutun**
+
+### Bağlantı Sorunlarında:
+- Firebase kurallarını kontrol edin
+- İnternet bağlantınızı kontrol edin
+- Sayfa yenileyin
+
+## 🔒 Güvenlik
+
+- Minimum 6 karakterlik kod zorunluluğu
+- Firebase Realtime Database kuralları
+- HTTPS zorunlu
+
+## ⚠️ Yasal Uyarı
+
+- Bu uygulama **yalnızca eğitim amaçlıdır**
+- Sadece **kendi cihazlarınızda** kullanın
+- Başkalarını izinsiz takip etmek **yasadışıdır**
+
 ---
 
-## ⚠️ Gereksinimler
-
-1. **İnternet bağlantısı** - Her iki cihazda da
-2. **İzinler** - Telefonda kamera, mikrofon ve konum izni
-3. **Modern tarayıcı** - Chrome, Firefox, Edge
-4. **HTTPS** - Kamera/mikrofon için güvenli bağlantı gerekli
-
----
-
-## 🎓 Proje Bilgileri
-
-**Konu:** Ekranı bozuk cihazların değerlendirilmesi - Uzaktan erişim sistemi
-
-**Özellikler:**
-- Canlı kamera görüntüsü
-- Canlı ses dinleme
-- GPS konum takibi
-- Pil durumu izleme
-
-**Teknolojiler:** HTML5, CSS3, JavaScript (ES6+), Firebase, Leaflet.js, Web APIs
-
----
-
-## 📄 Lisans
-
-Bu proje eğitim amaçlı geliştirilmiştir.
+**Versiyon:** 3.0 - Auto Reconnect  
+**Tarih:** Ocak 2026
